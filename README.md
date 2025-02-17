@@ -21,7 +21,7 @@ This repository provides the official implementation of the paper "TabDiff: a Mu
 
 ## Latest Update
 
-- [2025.01]：Our code is finally released!
+- [2025.02]：Our code is finally released!
 
 ## Introduction
 
