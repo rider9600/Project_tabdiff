@@ -21,7 +21,7 @@ This repository provides the official implementation of TabDiff: a Multi-Modal D
 
 ## Latest Update
 
-- [2024.10]：Our code is at the final stage of cleaning up. Please check back soon for its release!
+- [2025.02]：Our code is finally released!
 
 ## Introduction
 
