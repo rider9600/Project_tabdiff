@@ -1,4 +1,4 @@
-# TabDiff: a Multi-Modal Diffusion Model for Tabular Data Generation
+# TabDiff: a Mixed-type Diffusion Model for Tabular Data Generation
 
 <p align="center">
   <a href="https://github.com/MinkaiXu/TabDiff/blob/main/LICENSE">
@@ -17,7 +17,7 @@
   <p><em>Figure 1: Visualing the generative process of TabDiff. A high-quality version of this video can be found at <a href="images/tabdiff_demo.mp4" download>tabdiff_demo.mp4</a></em></p>
 </div>
 
-This repository provides the official implementation of TabDiff: a Multi-Modal Diffusion Model for Tabular Data Generation (ICLR 2025).
+This repository provides the official implementation of TabDiff: a Mixed-type Diffusion Model for Tabular Data Generation (ICLR 2025).
 
 ## Latest Update
 
@@ -183,7 +183,7 @@ Please consider citing our work if you find it helpful in your research!
 ```
 @inproceedings{
 shi2025tabdiff,
-title={TabDiff: a Multi-Modal Diffusion Model for Tabular Data Generation},
+title={TabDiff: a Mixed-type Diffusion Model for Tabular Data Generation},
 author={Juntong Shi and Minkai Xu and Harper Hua and Hengrui Zhang and Stefano Ermon and Jure Leskovec},
 booktitle={The Thirteenth International Conference on Learning Representations},
 year={2025},
