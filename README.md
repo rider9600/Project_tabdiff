@@ -21,7 +21,7 @@ This repository provides the official implementation of TabDiff: a Mixed-type Di
 
 ## Latest Update
 
-- [2025.02]：Our code is finally released!
+- [2025.02]：Our code is finally released! We have released part of the tested datasets. The rest will be released soon!
 
 ## Introduction
 
