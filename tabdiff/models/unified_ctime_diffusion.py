@@ -125,6 +125,7 @@ class UnifiedCtimeDiffusion(torch.nn.Module):
         
         # Discrete forward diff
         x_cat_t = x_cat
+        x_cat_t_soft = x_cat # in the case where x_cat is empty, x_cat_t_soft will have the same shape as x_cat
         if x_cat.shape[1] > 0:
             is_learnable = self.cat_scheduler == 'log_linear_per_column'
             strategy = 'soft'if is_learnable else 'hard'
@@ -428,10 +429,10 @@ class UnifiedCtimeDiffusion(torch.nn.Module):
         x_num_hat = x_num_cur + (sigma_num_hat ** 2 - sigma_num_cur ** 2).sqrt() * S_noise * torch.randn_like(x_num_cur)
         # Get x_cat_hat
         move_chance = -torch.expm1(sigma_cat_cur - sigma_cat_hat)    # the incremental move change is 1 - alpha_t/alpha_s = 1 - exp(sigma_s - sigma_t)
-        x_cat_hat, _ = self.q_xt(x_cat_cur, move_chance) if has_cat else x_cat_cur
+        x_cat_hat, _ = self.q_xt(x_cat_cur, move_chance) if has_cat else (x_cat_cur, x_cat_cur)
 
         # Get predictions
-        x_cat_hat_oh = self.to_one_hot(x_cat_hat).to(x_num_hat.dtype)
+        x_cat_hat_oh = self.to_one_hot(x_cat_hat).to(x_num_hat.dtype) if has_cat else x_cat_hat
         denoised, raw_logits = self._denoise_fn(
             x_num_hat.float(), x_cat_hat_oh,
             t_hat.squeeze().repeat(b), sigma=sigma_num_hat.unsqueeze(0).repeat(b,1)  # sigma accepts (bs, K_num)
@@ -482,7 +483,7 @@ class UnifiedCtimeDiffusion(torch.nn.Module):
         # Apply 2nd order correction.
         if self.sampler_params['second_order_correction']:
             if i > 0:
-                x_cat_hat_oh = self.to_one_hot(x_cat_hat).to(x_num_next.dtype)
+                x_cat_hat_oh = self.to_one_hot(x_cat_hat).to(x_num_next.dtype) if has_cat else x_cat_hat
                 denoised, raw_logits = self._denoise_fn(
                     x_num_next.float(), x_cat_hat_oh,
                     t_next.squeeze().repeat(b), sigma=sigma_num_next.unsqueeze(0).repeat(b,1)

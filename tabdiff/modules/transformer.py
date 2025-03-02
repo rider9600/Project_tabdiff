@@ -49,10 +49,11 @@ class Tokenizer(nn.Module):
 
         if x_cat is not None:
             for start, end in zip(self.category_offsets, torch.cat([self.category_offsets[1:], torch.tensor([x_cat.shape[1]], device=x_cat.device)])):
-                x = torch.cat(
-                    [x, x_cat[:, start:end].unsqueeze(1) @ self.cat_weight[start:end][None]],
-                    dim=1,
-                )
+                if start < end:
+                    x = torch.cat(
+                        [x, x_cat[:, start:end].unsqueeze(1) @ self.cat_weight[start:end][None]],
+                        dim=1,
+                    )
         if self.bias is not None:
             bias = torch.cat(
                 [
