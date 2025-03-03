@@ -55,10 +55,12 @@ def main(args):
     raw_config = src.load_config(config_path)
     
     print(f"{args.mode.capitalize()} Mode is Enabled")
+    num_samples_to_generate = None
     ckpt_path = None
     if args.mode == 'train':
         print("NEW training is started")
     elif args.mode == 'test':
+        num_samples_to_generate = args.num_samples_to_generate
         ckpt_path = args.ckpt_path
         if ckpt_path is None:
             ckpt_parent_path = f"{curr_dir}/ckpt/{dataname}/{exp_name}"
@@ -248,6 +250,7 @@ def main(args):
         logger,
         **raw_config['train']['main'],
         sample_batch_size=sample_batch_size,
+        num_samples_to_generate=num_samples_to_generate,
         model_save_path=raw_config['model_save_path'],
         result_save_path=raw_config['result_save_path'],
         device=device,

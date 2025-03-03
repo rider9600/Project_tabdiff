@@ -20,6 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('--non_learnable_schedule', action='store_true', help='disable learnable noise schedule')
     
     # Configs for testing tabdiff
+    parser.add_argument('--num_samples_to_generate', type=int, default=None, help='Number of samples to be generated while testing')
     parser.add_argument('--ckpt_path', type=str, default=None, help='Path to the model checkpoint to be tested')
     parser.add_argument('--report', action='store_true', help="Report testing mode: this mode sequentially runs <num_runs> test runs and report the avg and std")
     parser.add_argument('--num_runs', type=int, default=20, help="Number of runs to be averaged in the report testing mode")

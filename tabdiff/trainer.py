@@ -26,6 +26,7 @@ class Trainer:
             lr, weight_decay,
             steps, batch_size, check_val_every,
             sample_batch_size, model_save_path, result_save_path,
+            num_samples_to_generate=None,
             lr_scheduler='reduce_lr_on_plateau',
             reduce_lr_patience=100, factor=0.9, 
             ema_decay=0.997,
@@ -64,6 +65,7 @@ class Trainer:
 
         self.batch_size = batch_size
         self.sample_batch_size = sample_batch_size
+        self.num_samples_to_generate = num_samples_to_generate
         self.metrics = metrics
         self.logger = logger
         self.check_val_every = check_val_every
@@ -399,7 +401,7 @@ class Trainer:
         self.diffusion.eval()
         
         # Sample a synthetic table
-        num_samples = self.metrics.real_data_size
+        num_samples = self.num_samples_to_generate if self.num_samples_to_generate else self.metrics.real_data_size # By default, num_samples_to_generate is not specified. In this case, we generate the same number of samples as the real dataset. This approach is consistently used across all experiments in the paper.
         syn_df = self.sample_synthetic(num_samples, ema=ema)
         
         # Save the sample
