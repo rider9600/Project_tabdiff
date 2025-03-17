@@ -200,12 +200,13 @@ class Trainer:
 
             # Log the learned noise schedules for categlrical dimensions
             cat_noise_dict = {}
-            if len(self.diffusion.cat_schedule.k()) > 0:    # if categorical data is not empty
-                if self.diffusion.cat_schedule.k().dim() > 0 and len(self.diffusion.cat_schedule.k()) > 1:
-                    cat_noise_dict = {f"cat_noise/k_col_{i}": value.item() for i, value in enumerate(self.diffusion.cat_schedule.k())}
-                else:
-                    cat_noise_dict = {"cat_noise/k": self.diffusion.cat_schedule.k().item()}
+            if self.diffusion.cat_schedule.k().dim() == 0:   # non-learnable cat schedule
+                cat_noise_dict = {"cat_noise/k": self.diffusion.cat_schedule.k().item()}
                 log_dict.update(cat_noise_dict)
+            else:
+                if len(self.diffusion.cat_schedule.k()) > 0:    # if categorical data is not empty
+                    cat_noise_dict = {f"cat_noise/k_col_{i}": value.item() for i, value in enumerate(self.diffusion.cat_schedule.k())}
+                    log_dict.update(cat_noise_dict)
             
             # Adjust learning rate
             if self.lr_scheduler == 'reduce_lr_on_plateau':
