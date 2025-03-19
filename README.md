@@ -193,4 +193,4 @@ url={https://openreview.net/forum?id=swvURjrt8z}
 ## Contact
 If you encounter any problem, please file an issue on this GitHub repo.
 
-If you have any question regarding the paper, please contact Minkai at [minkai@stanford.edu](minkai@stanford.edu).
+If you have any question regarding the paper, please contact Minkai at [minkai@stanford.edu](minkai@stanford.edu) or Juntong at [shisteve@usc.edu](shisteve@usc.edu).
