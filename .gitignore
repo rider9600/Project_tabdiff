@@ -4,6 +4,8 @@
 data/*
 !/data/Info/
 
+wandb/
+eval/
 synthetic/
 impute/
 workspace/

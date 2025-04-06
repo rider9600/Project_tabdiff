@@ -5,6 +5,8 @@ import sys
 import json
 import argparse
 
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn import model_selection
 
 TYPE_TRANSFORM ={
     'float', np.float32,
@@ -130,7 +132,148 @@ def preprocess_news_dcr(remove_cat=False):
     info['data_path'] = data_save_path
     
     with open(f'{INFO_PATH}/{name}.json', 'w') as file:
-        json.dump(info, file, indent=4)    
+        json.dump(info, file, indent=4)
+    
+def preprocess_diabetes():
+    """
+    Preprocesses the diabetes dataset is aligned with the concurrent work
+    Continuous Diffusion for Mixed-Type Tabular Data (CDTD):
+    https://github.com/muellermarkus/cdtd
+    """
+    with open(f'{INFO_PATH}/diabetes.json', 'r') as f:
+        info = json.load(f)
+
+    info['num_col_idx'] = list(range(9))
+    info['cat_col_idx'] = list(range(9, 36))
+    info['target_col_idx'] = [36]
+    
+    data_path = info['raw_data_path']
+    df = pd.read_csv(data_path, sep=',')
+    df = df[info['column_names']]
+    df = df.replace(r' ', np.nan)
+    df = df.replace(r'?', np.nan)
+    df = df.replace(r'', np.nan)
+    
+    num_features = [info['column_names'][idx] for idx in info['num_col_idx']]
+    cat_features = [info['column_names'][idx] for idx in info['cat_col_idx']]
+    target = info['column_names'][info['target_col_idx'][0]]
+    df[target] = np.where(df[target] == 'NO', 0, 1)
+    enc = OrdinalEncoder()
+    df['age'] = enc.fit_transform(df['age'].to_numpy().reshape(-1,1))
+    
+    # remove rows with missings in targets
+    idx_target_nan = df[target].isna().to_numpy().nonzero()[0]
+    df.drop(labels = idx_target_nan, axis = 0, inplace = True)
+    
+    # for categorical features, replace missings with 'empty', which will be counted as a new category
+    df[cat_features] = df[cat_features].fillna('empty')
+    
+    # for continuous data, drop missing
+    df.dropna(inplace = True)
+    
+    # ensure correct types
+    X_cat = df[cat_features].to_numpy().astype('str')
+    X_cont = df[num_features].to_numpy().astype('float')
+    y = df[[target]].to_numpy()
+    
+    val_prop, test_prop = 0.2, 0.2
+    prop = val_prop / (1 - test_prop) 
+    
+    stratify = None if info['task_type'] == 'regression' else y
+    X_cat_train, X_cat_test, X_cont_train, X_cont_test, y_train, y_test = \
+        model_selection.train_test_split(X_cat, X_cont, y, test_size = test_prop, 
+                                        stratify = stratify, random_state = 42)
+    if val_prop > 0:
+        stratify = None if info['task_type'] == 'regression' else y_train
+        X_cat_train, X_cat_val, X_cont_train, X_cont_val, y_train, y_val = \
+            model_selection.train_test_split(X_cat_train, X_cont_train, y_train,
+                                            stratify = stratify, test_size = prop, 
+                                            random_state = 42)
+    
+    train_df = pd.DataFrame(np.concatenate([X_cont_train, X_cat_train, y_train], axis = 1), columns = num_features + cat_features + [target])
+    val_df = pd.DataFrame(np.concatenate([X_cont_val, X_cat_val, y_val], axis = 1), columns = num_features + cat_features + [target])
+    test_df = pd.DataFrame(np.concatenate([X_cont_test, X_cat_test, y_test], axis = 1), columns = num_features + cat_features + [target])
+
+    # Save the splited data
+    train_df.to_csv(info['data_path'], index = False)
+    val_df.to_csv(info['val_path'], index = False)
+    test_df.to_csv(info['test_path'], index = False)
+    # Save updated info
+    with open(f'{INFO_PATH}/diabetes.json', 'w') as file:
+        json.dump(info, file, indent=4)
+        
+def preprocess_diabetes_dcr():
+    """
+    Preprocesses the diabetes dataset is aligned with the concurrent work
+    Continuous Diffusion for Mixed-Type Tabular Data (CDTD):
+    https://github.com/muellermarkus/cdtd
+    """
+    with open(f'{INFO_PATH}/diabetes_dcr.json', 'r') as f:
+        info = json.load(f)
+
+    info['num_col_idx'] = list(range(9))
+    info['cat_col_idx'] = list(range(9, 36))
+    info['target_col_idx'] = [36]
+    
+    data_path = info['raw_data_path']
+    df = pd.read_csv(data_path, sep=',')
+    df = df[info['column_names']]
+    df = df.replace(r' ', np.nan)
+    df = df.replace(r'?', np.nan)
+    df = df.replace(r'', np.nan)
+    
+    num_features = [info['column_names'][idx] for idx in info['num_col_idx']]
+    cat_features = [info['column_names'][idx] for idx in info['cat_col_idx']]
+    target = info['column_names'][info['target_col_idx'][0]]
+    df[target] = np.where(df[target] == 'NO', 0, 1)
+    enc = OrdinalEncoder()
+    df['age'] = enc.fit_transform(df['age'].to_numpy().reshape(-1,1))
+    
+    # remove rows with missings in targets
+    idx_target_nan = df[target].isna().to_numpy().nonzero()[0]
+    df.drop(labels = idx_target_nan, axis = 0, inplace = True)
+    
+    # for categorical features, replace missings with 'empty', which will be counted as a new category
+    df[cat_features] = df[cat_features].fillna('empty')
+    
+    # for continuous data, drop missing
+    df.dropna(inplace = True)
+    
+    # ensure correct types
+    X_cat = df[cat_features].to_numpy().astype('str')
+    X_cont = df[num_features].to_numpy().astype('float')
+    y = df[[target]].to_numpy()
+    
+    val_prop, test_prop = 0.0, 0.5      # 50-50 split for dcr eval
+    prop = val_prop / (1 - test_prop) 
+    
+    stratify = None if info['task_type'] == 'regression' else y
+    X_cat_train, X_cat_test, X_cont_train, X_cont_test, y_train, y_test = \
+        model_selection.train_test_split(X_cat, X_cont, y, test_size = test_prop, 
+                                        stratify = stratify, random_state = 42)
+    if val_prop > 0:
+        stratify = None if info['task_type'] == 'regression' else y_train
+        X_cat_train, X_cat_val, X_cont_train, X_cont_val, y_train, y_val = \
+            model_selection.train_test_split(X_cat_train, X_cont_train, y_train,
+                                            stratify = stratify, test_size = prop, 
+                                            random_state = 42)
+    
+    train_df = pd.DataFrame(np.concatenate([X_cont_train, X_cat_train, y_train], axis = 1), columns = num_features + cat_features + [target])
+    if val_prop > 0:
+        val_df = pd.DataFrame(np.concatenate([X_cont_val, X_cat_val, y_val], axis = 1), columns = num_features + cat_features + [target])
+    else:
+        val_df = pd.DataFrame(columns = num_features + cat_features + [target]).astype(train_df.dtypes)
+    test_df = pd.DataFrame(np.concatenate([X_cont_test, X_cat_test, y_test], axis = 1), columns = num_features + cat_features + [target])
+
+    # Save the splited data
+    train_df.to_csv(info['data_path'], index = False)
+    val_df.to_csv(info['val_path'], index = False)
+    test_df.to_csv(info['test_path'], index = False)
+    # Save updated info
+    with open(f'{INFO_PATH}/diabetes_dcr.json', 'w') as file:
+        json.dump(info, file, indent=4)
+    
+
 
 def get_column_name_mapping(data_df, num_col_idx, cat_col_idx, target_col_idx, column_names = None):
     
@@ -215,7 +358,11 @@ def process_data(name):
         preprocess_beijing()
     elif name == 'beijing_dcr':
         preprocess_beijing_dcr()
-    
+    elif name == 'diabetes':
+        preprocess_diabetes()
+    elif name == 'diabetes_dcr':
+        preprocess_diabetes_dcr()
+
     with open(f'{INFO_PATH}/{name}.json', 'r') as f:
         info = json.load(f)
 
@@ -350,10 +497,10 @@ def process_data(name):
     for col in cat_columns:
         train_df.loc[train_df[col] == '?', col] = 'nan'
     for col in num_columns:
-        if (train_df[col] == ' ?').sum() > 0:
+        if (test_df[col] == ' ?').sum() > 0:
             print(col)
             import pdb; pdb.set_trace()
-        if (train_df[col] == '?').sum() > 0:
+        if (test_df[col] == '?').sum() > 0:
             print(col)
             import pdb; pdb.set_trace()
         test_df.loc[test_df[col] == '?', col] = np.nan
@@ -485,12 +632,13 @@ if __name__ == "__main__":
         process_data(args.dataname)
     else:
         for name in [
-                'adult', 'default', 'shoppers', 'magic', 'beijing', 'news', 'news_nocat',
+                'adult', 'default', 'shoppers', 'magic', 'beijing', 'news', 'news_nocat', 'diabetes',
                 'adult_dcr',
                 'default_dcr',
                 'shoppers_dcr',
                 'beijing_dcr',
                 'news_dcr', 
+                'diabetes_dcr'
             ]:    
             process_data(name)
 

@@ -20,7 +20,7 @@
 This repository provides the official implementation of TabDiff: a Mixed-type Diffusion Model for Tabular Data Generation (ICLR 2025).
 
 ## Latest Update
-
+- [2025.04]：The categorical-heavy dataset **[Diabetes](https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008)** evaluated in the paper has now been released!
 - [2025.02]：Our code is finally released! We have released part of the tested datasets. The rest will be released soon!
 
 ## Introduction
