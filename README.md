@@ -94,6 +94,11 @@ Then, create <NAME_OF_YOUR_DATASET>.json in [./data/Info](./data/Info). Write th
 }
 ```
 
+### Important Notes When Creating the Info File
+- The MLE evaluation and the imputation task (see later sections for details) assume that one column of your data is the regression or classification target. To enable these tasks, you will need to specify `target_col_idx`. If you don't need to evalute MLE, you can comment out the following line: https://github.com/MinkaiXu/TabDiff/blob/0c4fc3bbfa19046d36c5dce64628df52d5c73d15/tabdiff/main.py#L152
+- The fields `target_col_idx`, `num_col_idx` and `cat_col_idx` must be multually exclusive—no column should appear in more than one of these lists. 
+- Set the task_type to "regression" if the target column is numerical, or "binclass" if it is categorical.
+
 Finally, run the following command to process your dataset:
 ```
 python process_dataset.py --dataname <NAME_OF_YOUR_DATASET>
