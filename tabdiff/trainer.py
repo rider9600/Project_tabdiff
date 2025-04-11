@@ -191,22 +191,22 @@ class Trainer:
             log_dict.update(loss_dict)
             
             # Log the learned noise schedules for numerical dimensions
-            num_noise_dict = {}
-            if self.diffusion.num_schedule.rho().dim() > 0 and len(self.diffusion.num_schedule.rho()) > 1:
-                num_noise_dict = {f"num_noise/rho_col_{i}": value.item() for i, value in enumerate(self.diffusion.num_schedule.rho())}
-            else:
-                num_noise_dict = {"num_noise/rho": self.diffusion.num_schedule.rho().item()}
-            log_dict.update(num_noise_dict)
+            if self.dataset.d_numerical > 0:    # numerical data is not empty
+                num_noise_dict = {}
+                if self.diffusion.num_schedule.rho().dim() == 0:   # non-learnable num schedule
+                    num_noise_dict = {"num_noise/rho": self.diffusion.num_schedule.rho().item()}
+                else:
+                    num_noise_dict = {f"num_noise/rho_col_{i}": value.item() for i, value in enumerate(self.diffusion.num_schedule.rho())}
+                log_dict.update(num_noise_dict)            
 
             # Log the learned noise schedules for categlrical dimensions
-            cat_noise_dict = {}
-            if self.diffusion.cat_schedule.k().dim() == 0:   # non-learnable cat schedule
-                cat_noise_dict = {"cat_noise/k": self.diffusion.cat_schedule.k().item()}
-                log_dict.update(cat_noise_dict)
-            else:
-                if len(self.diffusion.cat_schedule.k()) > 0:    # if categorical data is not empty
+            if len(self.dataset.categories) > 0:    # categorical data is not empty
+                cat_noise_dict = {}
+                if self.diffusion.cat_schedule.k().dim() == 0:   # non-learnable cat schedule
+                    cat_noise_dict = {"cat_noise/k": self.diffusion.cat_schedule.k().item()}
+                else:
                     cat_noise_dict = {f"cat_noise/k_col_{i}": value.item() for i, value in enumerate(self.diffusion.cat_schedule.k())}
-                    log_dict.update(cat_noise_dict)
+                log_dict.update(cat_noise_dict)
             
             # Adjust learning rate
             if self.lr_scheduler == 'reduce_lr_on_plateau':
