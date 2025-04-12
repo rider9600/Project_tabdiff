@@ -67,6 +67,9 @@ class UnifiedCtimeDiffusion(torch.nn.Module):
         self.edm_params = edm_params
         self.noise_dist_params = noise_dist_params
         self.sampler_params = sampler_params
+        if self.num_numerical_features == 0:
+            self.sampler_params['stochastic_sampler'] = False
+            self.sampler_params['second_order_correction'] = False
         
         self.w_num = 0.0
         self.w_cat = 0.0
@@ -205,14 +208,6 @@ class UnifiedCtimeDiffusion(torch.nn.Module):
                 sigma_cat_cur[i], sigma_cat_next[i], sigma_cat_hat[i],
             )
         
-        if not torch.all(z_cat < self.mask_index):      # catch any update result in the mask class or the dummy classes
-            error_index = torch.any(z_cat >= self.mask_index, dim=-1).nonzero()
-            error_z_cat = z_cat[error_index]
-            error_q_xs = q_xs[error_index]
-            print(error_index)
-            print(error_z_cat)
-            print(error_q_xs)
-            pdb.set_trace()
         assert torch.all(z_cat < self.mask_index)
         sample = torch.cat([z_norm, z_cat], dim=1).cpu()
         return sample
@@ -379,14 +374,6 @@ class UnifiedCtimeDiffusion(torch.nn.Module):
         copy_flag = (x != self.mask_index).to(x.dtype)
         
         z_cat = copy_flag * x + (1 - copy_flag) * _x
-        if not torch.all(z_cat <= self.mask_index):     # catch any update result in the dummy classes
-            error_index = torch.any(z_cat > self.mask_index, dim=-1).nonzero()
-            error_z_cat = z_cat[error_index]
-            error_q_xs = q_xs[error_index]
-            print(error_index)
-            print(error_z_cat)
-            print(error_q_xs)
-            pdb.set_trace()
         return copy_flag * x + (1 - copy_flag) * _x, q_xs
 
     def _sample_categorical(self, categorical_probs):
