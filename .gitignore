@@ -1,8 +1,11 @@
 **/__pycache__/**
 *.pyc
 
+baseline_tabdiff/data/*
+!baseline_tabdiff/data/Info/
+
 data/*
-!/data/Info/
+!data/Info/
 
 wandb/
 eval/
@@ -13,3 +16,11 @@ debug/
 tabdiff/result/
 
 **/ckpt/*
+*.pdf
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
