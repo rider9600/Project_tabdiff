@@ -178,3 +178,4 @@ pdflatex main.tex
 ## 👥 Contributors
 - **Course:** Diffusion & Flow Matching Generative AI (DFMGAI)
 - **Repository:** [https://github.com/rider9600/Project_tabdiff](https://github.com/rider9600/Project_tabdiff)
+

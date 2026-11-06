@@ -16,6 +16,8 @@ if __name__ == '__main__':
     parser.add_argument('--deterministic', action='store_true', help='Whether to make the entire process deterministic, i.e., fix global random seeds')
     
     # Configs for tabdiff
+    parser.add_argument('--steps', type=int, default=None, help='Number of training epochs (overrides config)')
+    parser.add_argument('--check_val_every', type=int, default=None, help='Evaluation frequency in epochs')
     parser.add_argument('--y_only', action='store_true', help='Train guidance model that only model the target column')
     parser.add_argument('--non_learnable_schedule', action='store_true', help='disable learnable noise schedule')
     

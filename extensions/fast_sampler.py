@@ -59,3 +59,4 @@ class FastMixedSampler:
             x_cat = sample_cat
             
         return x_num, x_cat
+

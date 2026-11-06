@@ -63,8 +63,12 @@ def plot_density(syn_data, real_data, info, num_per_row=3):
             plot_type=plot_type
         )
         
-        img_bytes = pio.to_image(fig, format='png')
-        img = Image.open(BytesIO(img_bytes))
+        try:
+            img_bytes = pio.to_image(fig, format='png')
+            img = Image.open(BytesIO(img_bytes))
+        except Exception as e:
+            print(f"Warning: could not export plotly image to png ({e}), using placeholder.")
+            img = Image.new('RGB', (400, 300), color=(240, 240, 240))
         imgs.append(img)
         
     width, height = imgs[0].size
