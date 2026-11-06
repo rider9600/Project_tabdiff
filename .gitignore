@@ -16,6 +16,7 @@ debug/
 tabdiff/result/
 
 **/ckpt/*
+results/**/*.csv
 *.pdf
 *.aux
 *.log

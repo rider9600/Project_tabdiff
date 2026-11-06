@@ -120,6 +120,11 @@ def main(args):
         raw_config['train']['main']['batch_size'] = 4096
         raw_config['sample']['batch_size'] = 10000
 
+    if getattr(args, 'steps', None) is not None:
+        raw_config['train']['main']['steps'] = args.steps
+    if getattr(args, 'check_val_every', None) is not None:
+        raw_config['train']['main']['check_val_every'] = args.check_val_every
+
     ## Load training data
     batch_size = raw_config['train']['main']['batch_size']
 
