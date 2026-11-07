@@ -78,7 +78,18 @@ class Trainer:
             state_dicts = torch.load(self.ckpt_path, map_location=self.device)
             self.diffusion._denoise_fn.load_state_dict(state_dicts['denoise_fn'])
             self.diffusion.num_schedule.load_state_dict(state_dicts['num_schedule'])
-            self.diffusion.cat_schedule.load_state_dict(state_dicts['cat_schedule'])   
+            self.diffusion.cat_schedule.load_state_dict(state_dicts['cat_schedule'])
+            ema_ckpt = self.ckpt_path.replace('model_', 'ema_model_')
+            if os.path.exists(ema_ckpt):
+                try:
+                    self.ema_model.load_state_dict(torch.load(ema_ckpt, map_location=self.device))
+                    print(f"EMA weights loaded from {ema_ckpt}")
+                except Exception:
+                    self.ema_model.load_state_dict(state_dicts['denoise_fn'])
+            else:
+                self.ema_model.load_state_dict(state_dicts['denoise_fn'])
+            self.ema_num_schedule.load_state_dict(state_dicts['num_schedule'])
+            self.ema_cat_schedule.load_state_dict(state_dicts['cat_schedule'])
             print(f"Weights are loaded from {self.ckpt_path}")     
         
         self.curr_epoch = int(os.path.basename(self.ckpt_path).split('_')[-1].split('.')[0]) if self.ckpt_path is not None else 0
