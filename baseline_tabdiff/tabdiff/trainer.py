@@ -200,9 +200,7 @@ class Trainer:
                 "loss/total_loss": total_loss
             }
             log_dict.update(loss_dict)
-
-            # Print live epoch status to screen (every 50 epochs, or first epoch, or eval epochs)
-            if (epoch + 1) % 50 == 0 or (epoch + 1) == 1 or (epoch + 1) % self.check_val_every == 0:
+            if (epoch + 1) % 50 == 0 or (epoch + 1) == 1:
                 print(f"[Epoch {epoch+1:4d}/{self.steps}] Total Loss: {total_loss:.4f} (Cat: {mloss:.4f}, Num: {gloss:.4f}) | LR: {curr_lr:.6f}", flush=True)
             
             # Log the learned noise schedules for numerical dimensions
