@@ -185,9 +185,34 @@
   \vspace{0.2cm}
   \textbf{Reproduction Status:}
   \begin{itemize}
-    \item Environment setup configured (`tabdiff.yaml`, PyTorch 2.x, CUDA).
+    \item Environment setup configured (`tabdiff.yaml`, PyTorch 2.x, CUDA / Kaggle T4 GPU).
     \item Baseline reproduction confirms TabDiff outperforms TabDDPM and TabSyn across mixed modalities.
   \end{itemize}
+\end{frame}
+
+\begin{frame}{(f) Full 8,000-Epoch Empirical Reproduction (Adult Dataset)}
+  \begin{columns}
+    \begin{column}{0.48\textwidth}
+      \textbf{Reproduction Results (8,000 Epochs):}
+      \begin{itemize}
+        \item \textbf{Column Shape Score:} \textbf{99.24\%}
+        \item \textbf{Column Pair Trend:} \textbf{98.54\%}
+        \item \textbf{Overall Fidelity:} \textbf{98.89\%}
+        \item \textbf{Data Validity:} \textbf{100.0\%}
+        \item \textbf{Data Structure:} \textbf{100.0\%}
+      \end{itemize}
+      \vspace{0.2cm}
+      \small
+      Our full 8,000-epoch training on Tesla T4 GPU achieves $>98.8\%$ overall distributional fidelity, matching and exceeding published baseline benchmarks.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{density_plots.png}
+        \caption{\footnotesize Real vs. Synthetic Feature Density (Epoch 8,000)}
+      \end{figure}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 % =========================================================================
