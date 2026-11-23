@@ -28,3 +28,4 @@ results/**/*.csv
 *.toc
 *.synctex.gz
 *.zip
+!docs/paper/*.pdf

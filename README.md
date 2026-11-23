@@ -16,8 +16,8 @@ Our project delivers three core contributions:
    - 🎯 **Feature-Correlation Coupling:** Modeling cross-column covariance to enhance multi-modal alignment.
    - 🛡️ **Novel Application:** Target-guided conditional generation for severe class imbalance.
 3. **Academic Deliverables:**
-   - 📊 **LaTeX Presentation:** A 30-minute evaluation presentation in LaTeX Beamer (`presentation/presentation.tex`) adhering to the mandatory sections **(a)** through **(i)**.
-   - 📝 **Project Report:** A comprehensive project report in LaTeX (`report/main.tex`).
+   - 📊 **LaTeX Presentation:** A 30-minute evaluation presentation in LaTeX Beamer (`docs/presentations/beamer/presentation.tex`) adhering to the mandatory sections **(a)** through **(i)**.
+   - 📝 **Project Report:** A comprehensive project report in LaTeX (`docs/report/main.tex`).
 
 ---
 
@@ -54,12 +54,11 @@ Project_tabdiff/
 │   ├── reproduction_logs/         # Raw logs from paper reproduction
 │   └── efficiency_comparison/     # Speedup and quality trade-off tables
 │
-├── report/                        # PROJECT REPORT (LaTeX source)
-│   └── main.tex                   # Complete project report with paper summary,
-│                                  # reproduction results, and extensions
-│
-└── presentation/                  # FINAL EVALUATION SLIDES (LaTeX Beamer)
-    └── presentation.tex           # Mandatory 30-min Beamer deck adhering to (a)-(i)
+└── docs/                          # ALL DOCUMENTS
+    ├── README.md                  # Index of documents
+    ├── paper/                     # Original TabDiff paper (ICLR 2025)
+    ├── presentations/             # Slide decks (.pptx) + LaTeX Beamer source (beamer/)
+    └── report/                    # Project report (LaTeX source, main.tex)
 ```
 
 ---
@@ -143,7 +142,7 @@ python experiments/run_benchmark.py --dataset adult --num_samples 1000
 
 ## 🎓 Mandatory Evaluation Presentation Structure
 
-The final 30-minute evaluation presentation is provided in LaTeX Beamer under [`presentation/presentation.tex`](presentation/presentation.tex). It strictly follows the mandatory nine-part syllabus:
+The final 30-minute evaluation presentation is provided in LaTeX Beamer under [`docs/presentations/beamer/presentation.tex`](docs/presentations/beamer/presentation.tex). It strictly follows the mandatory nine-part syllabus:
 
 - **(a) Problem Statement and Motivation:** Slides 3–4
 - **(b) Gaps Addressed:** Slide 5
@@ -157,7 +156,7 @@ The final 30-minute evaluation presentation is provided in LaTeX Beamer under [`
 
 To compile the presentation:
 ```bash
-cd presentation
+cd docs/presentations/beamer
 pdflatex presentation.tex
 ```
 
@@ -165,11 +164,11 @@ pdflatex presentation.tex
 
 ## 📄 Final Project Report
 
-The complete report source is available in [`report/main.tex`](report/main.tex). It contains the paper summary, reproduction methodology, theoretical derivations, and extended empirical benchmarks.
+The complete report source is available in [`docs/report/main.tex`](docs/report/main.tex). It contains the paper summary, reproduction methodology, theoretical derivations, and extended empirical benchmarks.
 
 To compile the report:
 ```bash
-cd report
+cd docs/report
 pdflatex main.tex
 ```
 
