@@ -29,3 +29,6 @@ results/**/*.csv
 *.synctex.gz
 *.zip
 !docs/paper/*.pdf
+
+# Paywalled reference papers: keep local only, never push
+docs/references/
