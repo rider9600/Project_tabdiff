@@ -32,3 +32,11 @@ results/**/*.csv
 
 # Paywalled reference papers: keep local only, never push
 docs/references/
+
+# Project data and outputs: never in git (rules/05)
+data_raw/
+data_clean/
+out/
+runs/
+*.pt
+*.ckpt
