@@ -3,6 +3,8 @@
 > **Topic:** TabDiff: A Mixed-Type Diffusion Model for Tabular Data Generation (ICLR 2025)  
 > **Team:** Project Group  
 
+> **Current direction (branch `Abhay`):** see [`docs/project_plan.md`](docs/project_plan.md). We apply TabDiff to road-traversal transactions (T-Drive, Beijing), following the transactional model of Rathan, Reddy & Mondal (2022), and add a graph-aware stochastic sampler.
+
 ---
 
 ## 📌 Executive Summary
@@ -56,6 +58,7 @@ Project_tabdiff/
 │
 └── docs/                          # ALL DOCUMENTS
     ├── README.md                  # Index of documents
+    ├── project_plan.md            # Current project plan (TabDiff on road-traversal transactions)
     ├── paper/                     # Original TabDiff paper (ICLR 2025)
     ├── presentations/             # Slide decks (.pptx) + LaTeX Beamer source (beamer/)
     └── report/                    # Project report (LaTeX source, main.tex)
