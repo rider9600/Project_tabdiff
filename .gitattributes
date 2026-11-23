@@ -1,0 +1,4 @@
+# Scripts run on Linux (Ada): always LF, even when checked out or archived on Windows
+*.sh     text eol=lf
+*.sbatch text eol=lf
+*.py     text eol=lf
