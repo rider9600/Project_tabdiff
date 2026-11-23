@@ -40,3 +40,4 @@ out/
 runs/
 *.pt
 *.ckpt
+.venv/
