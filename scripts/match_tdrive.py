@@ -6,6 +6,11 @@
 With --chunk-dir, taxis are processed in chunks of CHUNK taxis, each saved as its own parquet file.
 A rerun skips chunks that already exist, so an interrupted run continues where it stopped.
 
+On Ada (rules/03): --time-limit-h with --session-start makes the run stop starting new chunks when
+elapsed + 1.2 x the slowest chunk so far would pass the limit. It then exits with code 0 and prints
+"TIME GUARD"; resubmitting the job continues with the remaining chunks. When every chunk is done, it
+writes the combined parquet, its report, and module_report.json in the chunk folder.
+
 Per taxi:
 1. Project points to metres (the graph's UTM zone) and drop points within MIN_MOVE_M of the previous
    kept point (taxi standing still; the time gap that remains still marks the stop).
@@ -45,13 +50,13 @@ _MAP = None
 _CRS = None
 
 
-def _init_worker() -> None:
+def _init_worker(graph_file=GRAPH_FILE) -> None:
     """Build the in-memory map once per worker process."""
     global _MAP, _CRS
     import osmnx as ox
     from leuvenmapmatching.map.inmem import InMemMap
 
-    graph = ox.project_graph(ox.load_graphml(GRAPH_FILE))
+    graph = ox.project_graph(ox.load_graphml(graph_file))
     _CRS = graph.graph["crs"]
     _MAP = InMemMap("beijing", use_latlon=False, use_rtree=True, index_edges=True)
     for n, d in graph.nodes(data=True):
@@ -118,10 +123,17 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--out", default=str(ROOT / "data_clean" / "matched_traversals.parquet"))
     ap.add_argument("--chunk-dir", default="", help="save and resume per chunk of taxis")
+    ap.add_argument("--graph", default=str(GRAPH_FILE))
+    ap.add_argument("--points", default=str(POINTS_FILE))
+    ap.add_argument("--time-limit-h", type=float, default=0.0, help="stop starting chunks near this limit")
+    ap.add_argument("--session-start", type=float, default=0.0, help="job start (epoch s); default now")
     a = ap.parse_args()
 
     start = time.time()
-    pts = pd.read_parquet(POINTS_FILE)
+    session_start = a.session_start or start
+    slowest_chunk = 1800.0      # assumed until a chunk has been timed (30 min)
+    stopped_by_guard = False
+    pts = pd.read_parquet(a.points)
     all_taxis = np.sort(pts["taxi"].unique())
     rng = np.random.default_rng(a.seed)
     if a.taxis:
@@ -139,7 +151,7 @@ def main() -> None:
         chunk_dir.mkdir(parents=True, exist_ok=True)
     chunks = [jobs[i:i + CHUNK] for i in range(0, len(jobs), CHUNK)]
     frames = []
-    with Pool(a.workers, initializer=_init_worker) as pool:
+    with Pool(a.workers, initializer=_init_worker, initargs=(a.graph,)) as pool:
         for c, chunk in enumerate(chunks):
             path = chunk_dir / f"chunk_{c:04d}.parquet" if chunk_dir else None
             if path is not None and path.exists():
@@ -149,6 +161,12 @@ def main() -> None:
                     totals[key] += stats[key]
                 print(f"chunk {c + 1}/{len(chunks)} already done, skipped", flush=True)
                 continue
+            if a.time_limit_h and time.time() - session_start + 1.2 * slowest_chunk > a.time_limit_h * 3600:
+                print(f"TIME GUARD: stopping before chunk {c + 1}/{len(chunks)} "
+                      f"({(time.time() - session_start) / 3600:.2f} h elapsed); resubmit to continue", flush=True)
+                stopped_by_guard = True
+                break
+            chunk_start = time.time()
             rows, ctot = [], {key: 0 for key in totals}
             for r, s in pool.imap_unordered(_match_taxi, chunk, chunksize=1):
                 rows.extend(r)
@@ -161,8 +179,14 @@ def main() -> None:
             frames.append(frame)
             for key in totals:
                 totals[key] += ctot[key]
+            took = time.time() - chunk_start
+            slowest_chunk = took if c == 0 or slowest_chunk == 1800.0 else max(slowest_chunk, took)
             done = sum(len(f) for f in frames)
-            print(f"chunk {c + 1}/{len(chunks)} done: {done} pieces so far, {time.time() - start:.0f} s", flush=True)
+            print(f"chunk {c + 1}/{len(chunks)} done in {took:.0f} s: {done} pieces so far, "
+                  f"{time.time() - start:.0f} s", flush=True)
+
+    if stopped_by_guard:
+        return
 
     out = pd.concat(frames, ignore_index=True).sort_values(["taxi", "t_start"]).reset_index(drop=True)
     out.insert(1, "piece_id", np.arange(len(out)))
@@ -179,6 +203,9 @@ def main() -> None:
         "settings": {"MIN_MOVE_M": MIN_MOVE_M, "GAP_S": GAP_S, "MIN_POINTS": MIN_POINTS, **MATCHER_KW},
     }
     out_path.with_suffix(".report.json").write_text(json.dumps(report, indent=2, default=str))
+    if chunk_dir:
+        (chunk_dir / "module_report.json").write_text(json.dumps(
+            {"module": "match", "chunks": len(chunks), "all_done": True, **report}, indent=2, default=str))
     print(json.dumps(report, indent=2, default=str))
 
 
