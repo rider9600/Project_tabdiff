@@ -44,3 +44,4 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 22:45 | Records updated for a chat compaction | Training 99878 at epoch ~350+, running; RESUME.md has the full restart state | RESUME.md |
 | 25 November 2026, 01:21 | Training 99878 hit the 6 h limit (TIMEOUT) at ~epoch 770 | Watcher crashed (decoding); fixed; resubmitted as 100223 from model_500 with checkpoints every 250 epochs | challenges.md 13 |
 | 25 November 2026 | The user proposed generating GPS coordinates directly | Recorded as a possible comparison (DiffTraj-style coordinate encoding); open for discussion | DISCUSSIONS.md, Plan.md 7 |
+| 25 November 2026, 02:15 | Records updated for a chat compaction | Training 100223 at epoch 600/2000, loss 0.44; RESUME.md current | RESUME.md |
