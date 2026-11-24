@@ -34,3 +34,6 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 13:45 | Runner options for Ada | --skip-tabdiff-eval, --seed, --samples-out (decision 19) | DECISIONS.md 19 |
 | 24 November 2026, 18:03 | Matching job 99378 ended (COMPLETED, 5.08 h) | Time guard stopped it after 17 of 20 chunks (26,206 pieces); log checked | compute_log.md |
 | 24 November 2026, 18:07 | Submitted continuation 99794 | Last 3 chunks; watcher and monitor started | |
+| 24 November 2026, 18:47 | Matching finished (99794 COMPLETED) | All 20 chunks, 30,246 pieces, 98.6% of points matched; copied to results_ada/match | DATA.md |
+| 24 November 2026, 18:52 | Built tdrive_k300 (K=300, 4 km) | 42,705 rows (train 29,378), median 3 segments per row; uploaded with code 7eb99da | DATA.md |
+| 24 November 2026, 18:55 | Submitted TabDiff training 99854 | 8,000 epochs max, checkpoint every 500, in-loop eval skipped (decision 19) | compute_log.md |

@@ -13,7 +13,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 99364 | match (tdr_match), auto-resubmit of 99363 | gnode046 / 2080 Ti | 24 Nov 12:33 | 24 Nov 12:33 | 0.00 | FAILED 1:0 | 0 | 680d943 | same cause; resubmitted by the watcher as "infrastructure" |
 | 99366 | env (tdr_env), rebuild with torch | gnode043 / 2080 Ti | 24 Nov 12:36 | 24 Nov 12:58 | 0.37 | COMPLETED | env 5.8 GB, torch 2.11.0+cu128, cuda ok, 15 tests passed | 751d9bd | Ada home now 95% full (1.5 GB free) |
 | 99378 | match (tdr_match) | gnode043 / 2080 Ti | 24 Nov 12:58 | 24 Nov 18:03 | 5.08 | COMPLETED (time guard) | 17 of 20 chunks, 26,206 matched pieces | 751d9bd | 915 to 1,164 s per chunk of 50 taxis |
-| 99794 | match (tdr_match), continuation | | 24 Nov 18:07 (submitted) | | | running | | 751d9bd | last 3 chunks |
+| 99794 | match (tdr_match), continuation | gnode043 / 2080 Ti | 24 Nov 18:07 | 24 Nov 18:47 | 0.66 | COMPLETED | chunks 18 to 20; all 20 done: 30,246 pieces, 98.6% of points matched | 751d9bd | 653 to 977 s per chunk |
+| 99854 | train (tdr_train), tdrive_k300, 8,000 epochs max, checkpoint every 500 | | 24 Nov 18:55 (submitted) | | | running | | 7eb99da | --skip-tabdiff-eval |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 
@@ -39,10 +40,10 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 |---|---|---|---|
 | Data preparation (road graph, T-Drive profile and cleaning) | Laptop | about 6.6 min of compute (201 + 96 + 97 s) | done |
 | Map-matching development (benchmarks, smoke test, diagnostic) | Laptop | about 17 min | done |
-| Map-matching, main run | Laptop 46 min (stopped), then Ada | Ada 5.08 h for 17 of 20 chunks; continuation 99794 running | running |
+| Map-matching, main run | Laptop 46 min (stopped), then Ada | **Ada 5.74 h** (99378 5.08 h + 99794 0.66 h), 1,000 taxis | done |
 | Ada environment setup | Ada | 0.52 h over 2 jobs (+ 2 failed starts of 0 s) | done |
-| Transaction table | Laptop | not started on the real data | |
-| TabDiff training | Ada | not started | |
+| Transaction table | Laptop | 62 s (build_transactions.py) | done: 42,705 rows |
+| TabDiff training | Ada | job 99854 from 18:55 | running |
 | Sampling (default and graph-aware) | Ada | not started | |
 | Evaluation | Laptop | smoke test 548 s | |
 

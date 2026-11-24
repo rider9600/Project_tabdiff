@@ -85,7 +85,7 @@ A matching break restarts from the break point.
 | Benchmark, default settings | 5 | 5 | 197 | 78 (40%) | | too many early breaks |
 | Benchmark, sparse-data settings | 5 | 5 | 164 | 131 (80%) | | 76 ms per point |
 | Smoke test (full script) | 4 | 121 | 2,045 | 1,952 (95.5%) | 150 | 26,157 of 26,157 consecutive node pairs are real directed edges; median 129 nodes per piece |
-| Main run | 1,000 (random, seed 0) | running | | | | |
+| Main run (Ada 99378 + 99794, 5.74 h) | 1,000 (random, seed 0) | 26,209 | 677,004 | 667,252 (98.6%) | 30,246 | median 116 nodes per piece; 10,935 breaks restarted |
 
 Matching all 10,207 taxis would take about 250 to 280 CPU hours, so a random sample of 1,000 taxis is
 matched (decision 17). Expected yield is well above the 20,000-transaction target.
@@ -93,3 +93,19 @@ matched (decision 17). Expected yield is well above the 20,000-transaction targe
 Transaction builder (scripts/build_transactions.py), smoke sample of 4 taxis: 350 transactions after
 the backtracking split; a 4 km area with 959 used segments; 100 columns; 105 gap-free rows (60 / 12 /
 33 by taxi); median 3 segments per row. The real numbers follow after the main run.
+
+### Transaction table tdrive_k300 (24 November 2026, scripts/build_transactions.py, 62 s)
+
+| Step | Count |
+|---|---|
+| Matched pieces / taxis with pieces | 30,246 / 951 |
+| Transactions after the backtracking split (2+ segments) | 83,039 |
+| Distinct directed segments used | 62,982 |
+| Area: 4 km square around the densest 500 m cell (UTM centre 453250, 4417750) | 1,991 segments used inside |
+| Columns: most-used segments in the area | 300 (each used by at least 495 transactions) |
+| Rows: gap-free runs of 2+ column segments | **42,705** (train 29,378 / val 4,566 / test 8,761, split by taxi) |
+| Segments per row | median 3 (10th to 90th percentile: 2 to 8); route length median 0.30 km |
+
+Every row passed the simple-path check. Rows are short because clipping to 300 columns cuts longer
+trips into pieces: a limitation of the column budget, stated in the report.
+
