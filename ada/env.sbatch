@@ -16,7 +16,8 @@
 
 set -euo pipefail
 : "${PROJECT:?set PROJECT with --export=ALL,PROJECT=tabdiff_roads}"
-source /home2/cs9442.01/$PROJECT/code/ada/common.sh     # activates ~/envs/qm until .ready exists
+export USE_QM_ENV=1                                      # GPU check with ~/envs/qm while building
+source /home2/cs9442.01/$PROJECT/code/ada/common.sh
 
 ENV=$HOME/envs/$PROJECT
 if [ ! -x "$ENV/bin/python" ]; then
@@ -25,7 +26,13 @@ fi
 set +u; source "$ENV/bin/activate"; set -u
 python -m pip install -q --upgrade pip
 python -m pip install -q -r requirements_match.txt
+# PyTorch with CUDA 12.8 (supports the RTX 2080 Ti, sm_75), then the TabDiff packages.
+python -m pip install -q torch --index-url https://download.pytorch.org/whl/cu128
+python -m pip install -q -r requirements_tabdiff.txt
 python -c "import osmnx, leuvenmapmatching, rtree, pyproj, pandas, pyarrow, mlxtend; print('imports ok', osmnx.__version__)"
+python -c "import torch, sklearn, scipy, sdmetrics, xgboost, tomli, tomli_w, prdc, icecream, category_encoders; print('tabdiff imports ok, torch', torch.__version__)"
+# The project env itself must run a CUDA kernel on this GPU, since common.sh checks the GPU with it.
+python -c "import torch; x = torch.ones(8, device='cuda'); assert float((x * 2).sum()) == 16; print('cuda ok', torch.cuda.get_device_name(0))"
 python -m unittest discover -s tests -v
 du -sh "$ENV"
 touch "$ENV/.ready"

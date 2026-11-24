@@ -1,0 +1,13 @@
+# TabDiff packages (installed after torch from the CUDA 12.8 index; see ada/env.sbatch)
+scikit-learn
+scipy
+tqdm
+sdmetrics
+xgboost
+wandb
+tomli
+tomli-w
+prdc
+icecream
+category_encoders
+plotly

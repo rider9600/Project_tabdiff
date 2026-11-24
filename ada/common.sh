@@ -6,8 +6,9 @@ JOB_START=$(date +%s)
 echo "=== job ${SLURM_JOB_ID:-none} (${SLURM_JOB_NAME:-}) on $(hostname) start $(date '+%F %T')"
 
 # The env: ~/envs/$PROJECT once ada/env.sbatch has checked it (.ready), else ~/envs/qm for the GPU check.
+# The env job sets USE_QM_ENV=1 so that it always checks the GPU with ~/envs/qm while it (re)builds.
 set +u   # activate scripts may read unset variables
-if [ -f "$HOME/envs/$PROJECT/.ready" ]; then
+if [ -f "$HOME/envs/$PROJECT/.ready" ] && [ -z "${USE_QM_ENV:-}" ]; then
     source "$HOME/envs/$PROJECT/bin/activate"
 else
     source "$HOME/envs/qm/bin/activate"
