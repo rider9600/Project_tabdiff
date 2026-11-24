@@ -90,5 +90,6 @@ A matching break restarts from the break point.
 Matching all 10,207 taxis would take about 250 to 280 CPU hours, so a random sample of 1,000 taxis is
 matched (decision 17). Expected yield is well above the 20,000-transaction target.
 
-Still to fill in: transactions after the backtracking split, the chosen area, the number of segment
-columns.
+Transaction builder (scripts/build_transactions.py), smoke sample of 4 taxis: 350 transactions after
+the backtracking split; a 4 km area with 959 used segments; 100 columns; 105 gap-free rows (60 / 12 /
+33 by taxi); median 3 segments per row. The real numbers follow after the main run.

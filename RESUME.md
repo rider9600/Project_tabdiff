@@ -1,4 +1,4 @@
-# Resume here: live state (updated 23 November 2026, 13:15 IST)
+# Resume here: live state (updated 24 November 2026, 11:55 IST)
 
 A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries on with the queue below.
 
@@ -6,7 +6,7 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 
 | Item | State |
 |---|---|
-| Running now | Laptop: map-matching of 1,000 taxis (scripts/match_tdrive.py, 7 workers), started 24 November 2026 13:05 IST, log data_clean/match_run.log, resumable: rerun the same command to continue |
+| Running now | Laptop: map-matching of 1,000 taxis (scripts/match_tdrive.py, 7 workers), started 24 November 2026 11:46 IST, log data_clean/match_run.log, resumable: rerun the same command to continue |
 | Watcher | None |
 | Code on Ada | None uploaded. Folder `~/tabdiff_roads` not yet created |
 | Ada disk | Not checked yet (`df -h ~` before the first upload) |
