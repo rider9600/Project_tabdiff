@@ -49,6 +49,6 @@ if [ -n "${LATEST:-}" ]; then
     echo "=== resuming from $LATEST"
     RESUME=(--ckpt_path "$LATEST")
 fi
-python -u scripts/run_tabdiff.py -- --dataname "$NAME" --mode train --steps "$STEPS" \
+python -u scripts/run_tabdiff.py --skip-tabdiff-eval -- --dataname "$NAME" --mode train --steps "$STEPS" \
     --check_val_every "$CHECK" --no_wandb --exp_name "$EXP" "${RESUME[@]}"
 ls -la "$PROJ/out/train/$NAME/$EXP" | tail -5
