@@ -17,3 +17,5 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 11:30 | T-Drive found and extracted | The user saved the zip in the repo root; moved to data_raw/tdrive/, contents checked (official release), licence read: no redistribution of data or derivatives | DATA.md |
 | 24 November 2026, 11:45 | T-Drive profiled and cleaned | 17.66M rows to 11.77M points inside the 5th Ring box, 10,207 taxis | DATA.md |
 | 24 November 2026, 11:50 | Map-matching: the user chose Python | Benchmark leuvenmapmatching on a sample before committing to it | DECISIONS.md 15 |
+| 24 November 2026, 12:40 | Map-matching benchmarked and smoke-tested | 95.5% of points matched; every matched step is a real directed road segment; about 2 to 4 min per taxi per core | DATA.md "Map-matching" |
+| 24 November 2026, 13:05 | Main map-matching run started on the laptop | 1,000 random taxis, 7 workers, resumable chunks of 50 in data_clean/match_chunks/; expected 8 to 9 h | RESUME.md |

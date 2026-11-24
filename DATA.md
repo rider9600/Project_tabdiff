@@ -74,5 +74,21 @@ segments that taxis actually use often.
 
 Output `data_clean/tdrive_points.parquet`, MD5 `80b6801a6f601e592de99201d846bc40`.
 
-Still to fill in: map-matching success rate, traversals, transactions, the chosen area, the number of
-segment columns.
+### Map-matching (24 November 2026, scripts/match_tdrive.py)
+
+Method: leuvenmapmatching (HMM, DistanceMatcher) in Python, decision 15. Before matching, points
+within 30 m of the previous kept point are dropped, and traversals are split at gaps over 15 minutes.
+A matching break restarts from the break point.
+
+| Run | Taxis | Traversals | Points | Matched | Pieces | Check |
+|---|---|---|---|---|---|---|
+| Benchmark, default settings | 5 | 5 | 197 | 78 (40%) | | too many early breaks |
+| Benchmark, sparse-data settings | 5 | 5 | 164 | 131 (80%) | | 76 ms per point |
+| Smoke test (full script) | 4 | 121 | 2,045 | 1,952 (95.5%) | 150 | 26,157 of 26,157 consecutive node pairs are real directed edges; median 129 nodes per piece |
+| Main run | 1,000 (random, seed 0) | running | | | | |
+
+Matching all 10,207 taxis would take about 250 to 280 CPU hours, so a random sample of 1,000 taxis is
+matched (decision 17). Expected yield is well above the 20,000-transaction target.
+
+Still to fill in: transactions after the backtracking split, the chosen area, the number of segment
+columns.

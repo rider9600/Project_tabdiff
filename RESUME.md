@@ -6,7 +6,7 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 
 | Item | State |
 |---|---|
-| Running now | Nothing. No Ada job has been submitted for this project |
+| Running now | Laptop: map-matching of 1,000 taxis (scripts/match_tdrive.py, 7 workers), started 24 November 2026 13:05 IST, log data_clean/match_run.log, resumable: rerun the same command to continue |
 | Watcher | None |
 | Code on Ada | None uploaded. Folder `~/tabdiff_roads` not yet created |
 | Ada disk | Not checked yet (`df -h ~` before the first upload) |
@@ -27,7 +27,7 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 |---|---|---|---|---|
 | 0 | none | Open questions to the user: fabricated-results cleanup, decisions 9 and 10, empty report/ folder, GPU budget, teammate names | 0 | asked |
 | 1 | laptop | OSM Beijing road graph and T-Drive download, profile, cleaning: **done** (DATA.md) | 0 | done |
-| 2 | laptop | Map-matching, backtracking transactions, area choice (≥ 20k transactions), TabDiff dataset files | 0 | no |
+| 2 | laptop | Map-matching: **running**. Next: backtracking transactions, area choice (≥ 20k transactions), TabDiff dataset files | 0 | in progress |
 | 3 | laptop | Reddy et al. pipeline (FP-Growth, popularity, top-k), evaluation suite, baselines, tests | 0 | no |
 | 4 | E0 | Environment job on Ada | 0.2 | no |
 | 5 | E1 | Benchmark job: speed, memory, exact resume | 0.5 | no |
