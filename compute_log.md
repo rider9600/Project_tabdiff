@@ -14,7 +14,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 99366 | env (tdr_env), rebuild with torch | gnode043 / 2080 Ti | 24 Nov 12:36 | 24 Nov 12:58 | 0.37 | COMPLETED | env 5.8 GB, torch 2.11.0+cu128, cuda ok, 15 tests passed | 751d9bd | Ada home now 95% full (1.5 GB free) |
 | 99378 | match (tdr_match) | gnode043 / 2080 Ti | 24 Nov 12:58 | 24 Nov 18:03 | 5.08 | COMPLETED (time guard) | 17 of 20 chunks, 26,206 matched pieces | 751d9bd | 915 to 1,164 s per chunk of 50 taxis |
 | 99794 | match (tdr_match), continuation | gnode043 / 2080 Ti | 24 Nov 18:07 | 24 Nov 18:47 | 0.66 | COMPLETED | chunks 18 to 20; all 20 done: 30,246 pieces, 98.6% of points matched | 751d9bd | 653 to 977 s per chunk |
-| 99854 | train (tdr_train), tdrive_k300, 8,000 epochs max, checkpoint every 500 | | 24 Nov 18:55 (submitted) | | | running | | 7eb99da | --skip-tabdiff-eval |
+| 99854 | train (tdr_train), tdrive_k300 | gnode043 / 2080 Ti | 24 Nov 18:52 | 24 Nov 18:53 | 0.01 | FAILED 1:0 | 0 | 7eb99da | DataLoader workers could not pickle TabDiff's lambda under Python 3.14 (challenge 10) |
+| 99856 | train (tdr_train), tdrive_k300, 8,000 epochs max, checkpoint every 500 | | 24 Nov 18:58 (submitted) | | | running | | a860ba9 | main-process data loading |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 

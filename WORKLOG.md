@@ -37,3 +37,5 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 18:47 | Matching finished (99794 COMPLETED) | All 20 chunks, 30,246 pieces, 98.6% of points matched; copied to results_ada/match | DATA.md |
 | 24 November 2026, 18:52 | Built tdrive_k300 (K=300, 4 km) | 42,705 rows (train 29,378), median 3 segments per row; uploaded with code 7eb99da | DATA.md |
 | 24 November 2026, 18:55 | Submitted TabDiff training 99854 | 8,000 epochs max, checkpoint every 500, in-loop eval skipped (decision 19) | compute_log.md |
+| 24 November 2026, 18:53 | Training 99854 failed at epoch 1 (32 s) | Pickling error under Python 3.14; fixed in a860ba9, uploaded | challenges.md 10 |
+| 24 November 2026, 18:58 | Resubmitted training as 99856 | Watcher started; waiting for the first epoch timings | compute_log.md |
