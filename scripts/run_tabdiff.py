@@ -29,6 +29,20 @@ def main() -> None:
 
     sys.path.insert(0, str(TABDIFF))
     sys.path.insert(0, str(ROOT / "src"))
+    if os.name == "nt":
+        # Windows can't send TabDiff's lambda transforms to DataLoader worker processes (Linux forks,
+        # so Ada is unaffected). On the laptop only, load data in the main process.
+        import torch.utils.data as tud
+
+        _init = tud.DataLoader.__init__
+
+        def _init_no_workers(self, *args, **kwargs):
+            kwargs["num_workers"] = 0
+            kwargs.pop("persistent_workers", None)
+            kwargs.pop("prefetch_factor", None)
+            _init(self, *args, **kwargs)
+
+        tud.DataLoader.__init__ = _init_no_workers
     stats = None
     if a.graph_edges:
         import pandas as pd
