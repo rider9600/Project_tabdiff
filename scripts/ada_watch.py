@@ -31,8 +31,11 @@ INFRA = re.compile(r"GPU CHECK FAILED|CUDA error|no CUDA-capable|NODE_FAIL|"
 
 
 def ssh(cmd: str) -> str:
-    r = subprocess.run(SSH + [cmd], capture_output=True, text=True, timeout=120)
-    return r.stdout.strip()
+    # UTF-8 with replacement: log tails contain progress-bar characters that the Windows default
+    # code page cannot decode, which crashed the watcher when job 99878 ended (challenge 13).
+    r = subprocess.run(SSH + [cmd], capture_output=True, text=True, encoding="utf-8", errors="replace",
+                       timeout=120)
+    return (r.stdout or "").strip()
 
 
 def log(path, **kw):
