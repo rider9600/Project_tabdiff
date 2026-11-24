@@ -6,7 +6,7 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 
 | Item | State |
 |---|---|
-| Running now | Ada: matching job 99378, submitted 24 November 2026 12:59 IST (expected about 5.5 h, then a second job for the remaining chunks). Env 99366 done. Earlier: 99351 env done; 99363 and 99364 matching failed at start (challenge 9). Laptop: map-matching of the same 1,000 taxis (7 workers, started 11:46 IST, chunks in data_clean/match_chunks/); it is stopped once the Ada matching job starts, and its finished chunks are uploaded to ~/tabdiff_roads/out/match/chunks |
+| Running now | Ada: matching job 99378, started 24 November 2026 12:58 IST; at 13:38, 2 of 20 chunks done (~16 min per chunk), so the time guard stops it after about 19 chunks (~18:15); one short second job for the rest. Env 99366 done. Earlier: 99351 env done; 99363 and 99364 matching failed at start (challenge 9). Laptop: map-matching of the same 1,000 taxis (7 workers, started 11:46 IST, chunks in data_clean/match_chunks/); it is stopped once the Ada matching job starts, and its finished chunks are uploaded to ~/tabdiff_roads/out/match/chunks |
 | Watcher | scripts/ada_watch.py on job 99378 (laptop, background), log in the session scratchpad watch_log.jsonl; Monitor armed on it. The laptop map-matching run was stopped at 12:32 (no chunk finished) |
 | Code on Ada | 751d9bd, uploaded 24 November 2026 12:35 IST, with tdrive_points.parquet and the road graph (MD5s in data_report.json) |
 | Ada disk | **24 GB used of 25 GB (1.5 GB free, 95%)** after the env with torch (5.8 GB). Watch checkpoint sizes; told the user |

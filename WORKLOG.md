@@ -30,3 +30,5 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 12:37 | Evaluation suite and baselines written | 15 tests pass, including the paper's worked example omega(p1) = 100 | commits 5212387 to 193342c |
 | 24 November 2026, 12:58 | Env job 99366 finished (COMPLETED, 21 min) | Log checked: torch 2.11.0+cu128, CUDA kernel ok on the 2080 Ti, 15 tests pass. Env is 5.8 GB: Ada home at 95% (1.5 GB free) | compute_log.md |
 | 24 November 2026, 12:59 | Submitted matching job 99378 | Same 1,000 taxis, resumable chunks | RESUME.md |
+| 24 November 2026, 13:38 | New Claude session; background watcher, monitors and the laptop sampling test had stopped | Ada job 99378 still running (40 min, 2 of 20 chunks, ~16 min per chunk); watcher and monitor restarted; sampling test rerun | RESUME.md |
+| 24 November 2026, 13:45 | Runner options for Ada | --skip-tabdiff-eval, --seed, --samples-out (decision 19) | DECISIONS.md 19 |
