@@ -25,7 +25,14 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--graph-edges", default="")
     ap.add_argument("--graph-strength", type=float, default=0.5)
+    ap.add_argument("--skip-tabdiff-eval", action="store_true",
+                    help="training: skip TabDiff's in-loop sample evaluation (checkpoints are still saved); "
+                         "test: only sample and save samples.csv, without TabDiff's metrics and plots")
+    ap.add_argument("--seed", type=int, default=None, help="seed torch, numpy and random before TabDiff starts")
+    ap.add_argument("--samples-out", default="", help="test mode: copy the generated samples.csv here")
     a = ap.parse_args(own)
+    train_mode = "test" not in passthrough[passthrough.index("--mode") + 1:passthrough.index("--mode") + 2] \
+        if "--mode" in passthrough else True
 
     sys.path.insert(0, str(TABDIFF))
     sys.path.insert(0, str(ROOT / "src"))
@@ -43,6 +50,35 @@ def main() -> None:
             _init(self, *args, **kwargs)
 
         tud.DataLoader.__init__ = _init_no_workers
+    if a.seed is not None:
+        import random
+
+        import numpy as np
+        import torch
+
+        random.seed(a.seed)
+        np.random.seed(a.seed)
+        torch.manual_seed(a.seed)
+        torch.cuda.manual_seed_all(a.seed)
+    saved = {}
+    if a.skip_tabdiff_eval:
+        import tabdiff.trainer as tt
+
+        def evaluate_generation(self, save_metric_details=False, plot_density=False, ema=False):
+            if train_mode:          # checkpoints were already saved by run_loop; skip sampling entirely
+                return {}, {}, None
+            self.diffusion.eval()
+            n = self.num_samples_to_generate or self.metrics.real_data_size
+            syn_df = self.sample_synthetic(n, ema=ema)
+            save_path = os.path.join(self.result_save_path, str(self.curr_epoch), "ema" if ema else "")
+            os.makedirs(save_path, exist_ok=True)
+            path = os.path.join(save_path, "samples.csv")
+            syn_df.to_csv(path, index=False)
+            saved["path"] = path
+            print(f"Samples are saved at {path}", flush=True)
+            return {}, {}, None
+
+        tt.Trainer.evaluate_generation = evaluate_generation
     stats = None
     if a.graph_edges:
         import pandas as pd
@@ -59,6 +95,15 @@ def main() -> None:
     try:
         runpy.run_path(str(TABDIFF / "main.py"), run_name="__main__")
     finally:
+        if a.samples_out and saved.get("path"):
+            import shutil
+
+            out = Path(a.samples_out)
+            if not out.is_absolute():
+                out = ROOT / out
+            out.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(saved["path"], out)
+            print(f"samples copied to {out}", flush=True)
         if stats and stats["calls"]:
             print(f"graph-aware sampler: {stats['calls']} re-masking calls, mean flagged share "
                   f"{stats['flagged_share_sum'] / stats['calls']:.4f}", flush=True)
