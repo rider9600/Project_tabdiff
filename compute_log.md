@@ -17,7 +17,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 99854 | train (tdr_train), tdrive_k300 | gnode043 / 2080 Ti | 24 Nov 18:52 | 24 Nov 18:53 | 0.01 | FAILED 1:0 | 0 | 7eb99da | DataLoader workers could not pickle TabDiff's lambda under Python 3.14 (challenge 10) |
 | 99856 | train (tdr_train), tdrive_k300 | gnode043 / 2080 Ti | 24 Nov 18:55 | 24 Nov 18:55 | 0.01 | FAILED 1:0 | 0 | a860ba9 | CUDA out of memory with batch 4096 (challenge 11) |
 | 99857 | train, batch 1024, 8,000 epochs | gnode043 / 2080 Ti | 24 Nov 18:58 | 24 Nov 19:21 | 0.39 | CANCELLED (by Claude) | 50+ epochs; loss 5.40 to 1.04 by epoch 50; about 25 s per epoch | fef0fd6 | 8,000 epochs would take ~55 h; restarted with 2,000 (decision 20) |
-| 99878 | train, batch 1024, 2,000 epochs, checkpoint every 500 (EXP=e2000) | | 24 Nov 19:22 (submitted) | | | running | | fef0fd6 | ~14 h over 3 jobs expected |
+| 99878 | train, batch 1024, 2,000 epochs, checkpoint every 500 (EXP=e2000) | gnode043 / 2080 Ti | 24 Nov 19:21 | 25 Nov 01:21 | 6.00 | TIMEOUT (expected) | about 770 epochs; checkpoint 500 saved (loss 0.43 at 550); ~28 s per epoch | fef0fd6 | watcher crashed at the end (challenge 13); resubmitted by hand |
+| 100223 | train, resume from model_500, checkpoint every 250 | | 25 Nov 01:25 (submitted) | | | running | | fef0fd6 | CHECK lowered to 250 to lose fewer epochs at each timeout |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 

@@ -6,9 +6,9 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 
 | Item | State |
 |---|---|
-| Running now | **Ada training job 99878** (tdr_train, tdrive_k300, EXP=e2000, 2,000 epochs, checkpoint every 500, batch 1,024). Started 24 Nov 19:22 IST; ~28 s per epoch; epoch 350 at 22:10 (loss 0.48). Expect TIMEOUT at 6 h (~01:20), watcher resubmits; total ~15.5 h, done ~11:00 on 25 Nov |
-| Exact resubmit command | `sbatch --export=ALL,PROJECT=tabdiff_roads,NAME=tdrive_k300,STEPS=2000,CHECK=500,EXP=e2000 tabdiff_roads/code/ada/train.sbatch` (resumes from newest model_<epoch>.pt) |
-| Watcher | scripts/ada_watch.py on 99878 (laptop background) + Monitor on scratchpad watch_log.jsonl. **Restart both in every new session** |
+| Running now | **Ada training job 100223** (resumed from model_500, CHECK=250; earlier 99878 TIMEOUT at 01:21). Previously: 99878 (tdr_train, tdrive_k300, EXP=e2000, 2,000 epochs, checkpoint every 500, batch 1,024). Started 24 Nov 19:22 IST; ~28 s per epoch; epoch 350 at 22:10 (loss 0.48). Expect TIMEOUT at 6 h (~01:20), watcher resubmits; total ~15.5 h, done ~11:00 on 25 Nov |
+| Exact resubmit command | `sbatch --export=ALL,PROJECT=tabdiff_roads,NAME=tdrive_k300,STEPS=2000,CHECK=250,EXP=e2000 tabdiff_roads/code/ada/train.sbatch` (resumes from newest model_<epoch>.pt) |
+| Watcher | scripts/ada_watch.py on 100223 (laptop background) + Monitor on scratchpad watch_log.jsonl. **Restart both in every new session** |
 | Code on Ada | fef0fd6 (latest pushed: see git log) |
 | Ada disk | 24 GB of 25 GB used (1.4 GB free). Each checkpoint (model + ema) ~100 MB; 4 expected |
 | Laptop copies | results_ada/match/ (matched_traversals.parquet + report) |
