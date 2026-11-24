@@ -22,7 +22,7 @@ set -euo pipefail
 EXP=${EXP:-main}
 source /home2/cs9442.01/$PROJECT/code/ada/common.sh
 [ -f "$HOME/envs/$PROJECT/.ready" ] || { echo "~/envs/$PROJECT not ready: run the env job first"; exit 1; }
-export WANDB_MODE=disabled
+export WANDB_MODE=disabled PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # Data check: the transaction table must match its laptop MD5s.
 python - "$PROJ/data_clean/tabdiff/$NAME" <<'PY'
@@ -49,6 +49,6 @@ if [ -n "${LATEST:-}" ]; then
     echo "=== resuming from $LATEST"
     RESUME=(--ckpt_path "$LATEST")
 fi
-python -u scripts/run_tabdiff.py --skip-tabdiff-eval -- --dataname "$NAME" --mode train --steps "$STEPS" \
+python -u scripts/run_tabdiff.py --skip-tabdiff-eval --train-batch-size "${BATCH:-1024}" --sample-batch-size 2000 -- --dataname "$NAME" --mode train --steps "$STEPS" \
     --check_val_every "$CHECK" --no_wandb --exp_name "$EXP" "${RESUME[@]}"
 ls -la "$PROJ/out/train/$NAME/$EXP" | tail -5
