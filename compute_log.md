@@ -12,7 +12,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 99363 | match (tdr_match) | gnode043 / 2080 Ti | 24 Nov 12:31 | 24 Nov 12:31 | 0.00 | FAILED 1:0 | 0 | 680d943 | GPU check: no torch in the project env (challenge 9) |
 | 99364 | match (tdr_match), auto-resubmit of 99363 | gnode046 / 2080 Ti | 24 Nov 12:33 | 24 Nov 12:33 | 0.00 | FAILED 1:0 | 0 | 680d943 | same cause; resubmitted by the watcher as "infrastructure" |
 | 99366 | env (tdr_env), rebuild with torch | gnode043 / 2080 Ti | 24 Nov 12:36 | 24 Nov 12:58 | 0.37 | COMPLETED | env 5.8 GB, torch 2.11.0+cu128, cuda ok, 15 tests passed | 751d9bd | Ada home now 95% full (1.5 GB free) |
-| 99378 | match (tdr_match) | gnode043 / 2080 Ti | 24 Nov 12:59 | | | running | | 751d9bd | 1,000 taxis, chunks of 50, guard 5.5 h |
+| 99378 | match (tdr_match) | gnode043 / 2080 Ti | 24 Nov 12:58 | 24 Nov 18:03 | 5.08 | COMPLETED (time guard) | 17 of 20 chunks, 26,206 matched pieces | 751d9bd | 915 to 1,164 s per chunk of 50 taxis |
+| 99794 | match (tdr_match), continuation | | 24 Nov 18:07 (submitted) | | | running | | 751d9bd | last 3 chunks |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 
@@ -38,7 +39,7 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 |---|---|---|---|
 | Data preparation (road graph, T-Drive profile and cleaning) | Laptop | about 6.6 min of compute (201 + 96 + 97 s) | done |
 | Map-matching development (benchmarks, smoke test, diagnostic) | Laptop | about 17 min | done |
-| Map-matching, main run | Laptop 46 min (stopped), then Ada | running on Ada since 12:59 | running |
+| Map-matching, main run | Laptop 46 min (stopped), then Ada | Ada 5.08 h for 17 of 20 chunks; continuation 99794 running | running |
 | Ada environment setup | Ada | 0.52 h over 2 jobs (+ 2 failed starts of 0 s) | done |
 | Transaction table | Laptop | not started on the real data | |
 | TabDiff training | Ada | not started | |

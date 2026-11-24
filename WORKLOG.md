@@ -32,3 +32,5 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 12:59 | Submitted matching job 99378 | Same 1,000 taxis, resumable chunks | RESUME.md |
 | 24 November 2026, 13:38 | New Claude session; background watcher, monitors and the laptop sampling test had stopped | Ada job 99378 still running (40 min, 2 of 20 chunks, ~16 min per chunk); watcher and monitor restarted; sampling test rerun | RESUME.md |
 | 24 November 2026, 13:45 | Runner options for Ada | --skip-tabdiff-eval, --seed, --samples-out (decision 19) | DECISIONS.md 19 |
+| 24 November 2026, 18:03 | Matching job 99378 ended (COMPLETED, 5.08 h) | Time guard stopped it after 17 of 20 chunks (26,206 pieces); log checked | compute_log.md |
+| 24 November 2026, 18:07 | Submitted continuation 99794 | Last 3 chunks; watcher and monitor started | |
