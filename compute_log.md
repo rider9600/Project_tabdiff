@@ -15,7 +15,9 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 99378 | match (tdr_match) | gnode043 / 2080 Ti | 24 Nov 12:58 | 24 Nov 18:03 | 5.08 | COMPLETED (time guard) | 17 of 20 chunks, 26,206 matched pieces | 751d9bd | 915 to 1,164 s per chunk of 50 taxis |
 | 99794 | match (tdr_match), continuation | gnode043 / 2080 Ti | 24 Nov 18:07 | 24 Nov 18:47 | 0.66 | COMPLETED | chunks 18 to 20; all 20 done: 30,246 pieces, 98.6% of points matched | 751d9bd | 653 to 977 s per chunk |
 | 99854 | train (tdr_train), tdrive_k300 | gnode043 / 2080 Ti | 24 Nov 18:52 | 24 Nov 18:53 | 0.01 | FAILED 1:0 | 0 | 7eb99da | DataLoader workers could not pickle TabDiff's lambda under Python 3.14 (challenge 10) |
-| 99856 | train (tdr_train), tdrive_k300, 8,000 epochs max, checkpoint every 500 | | 24 Nov 18:58 (submitted) | | | running | | a860ba9 | main-process data loading |
+| 99856 | train (tdr_train), tdrive_k300 | gnode043 / 2080 Ti | 24 Nov 18:55 | 24 Nov 18:55 | 0.01 | FAILED 1:0 | 0 | a860ba9 | CUDA out of memory with batch 4096 (challenge 11) |
+| 99857 | train, batch 1024, 8,000 epochs | gnode043 / 2080 Ti | 24 Nov 18:58 | 24 Nov 19:21 | 0.39 | CANCELLED (by Claude) | 50+ epochs; loss 5.40 to 1.04 by epoch 50; about 25 s per epoch | fef0fd6 | 8,000 epochs would take ~55 h; restarted with 2,000 (decision 20) |
+| 99878 | train, batch 1024, 2,000 epochs, checkpoint every 500 (EXP=e2000) | | 24 Nov 19:22 (submitted) | | | running | | fef0fd6 | ~14 h over 3 jobs expected |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 

@@ -39,3 +39,5 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 18:55 | Submitted TabDiff training 99854 | 8,000 epochs max, checkpoint every 500, in-loop eval skipped (decision 19) | compute_log.md |
 | 24 November 2026, 18:53 | Training 99854 failed at epoch 1 (32 s) | Pickling error under Python 3.14; fixed in a860ba9, uploaded | challenges.md 10 |
 | 24 November 2026, 18:58 | Resubmitted training as 99856 | Watcher started; waiting for the first epoch timings | compute_log.md |
+| 24 November 2026, 18:55 | Training 99856 failed: CUDA out of memory (batch 4096) | Added --train-batch-size; resubmitted with 1024 as 99857 | challenges.md 11 |
+| 24 November 2026, 19:20 | 99857 trains: epoch 50 at 19:20, ~25 s per epoch | 8,000 epochs = ~55 h, too long. Own decision: 2,000 epochs (decision 20); cancelled 99857 (23 min) and submitted 99878 | DECISIONS.md 20 |
