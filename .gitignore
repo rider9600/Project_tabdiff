@@ -41,3 +41,8 @@ runs/
 *.pt
 *.ckpt
 .venv/
+
+# Our T-Drive datasets inside the TabDiff tree (data licence: never commit)
+baseline_tabdiff/data/Info/tdrive*.json
+baseline_tabdiff/data/Info/smoke*.json
+.venv*/
