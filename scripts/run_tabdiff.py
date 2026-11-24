@@ -36,9 +36,10 @@ def main() -> None:
 
     sys.path.insert(0, str(TABDIFF))
     sys.path.insert(0, str(ROOT / "src"))
-    if os.name == "nt":
-        # Windows can't send TabDiff's lambda transforms to DataLoader worker processes (Linux forks,
-        # so Ada is unaffected). On the laptop only, load data in the main process.
+    if True:
+        # TabDiff's lambda transforms can't be sent to DataLoader worker processes unless they are
+        # forked: Windows spawns, and Python 3.14 on Linux (Ada) defaults to forkserver. The table is
+        # small (8 batches per epoch), so load data in the main process everywhere.
         import torch.utils.data as tud
 
         _init = tud.DataLoader.__init__
