@@ -1,7 +1,16 @@
 # Data card
 
-**Status (23 November 2026): T-Drive not yet downloaded.** Microsoft's server refuses automated
-downloads (challenge 6), so the user downloads it in a browser into `data_raw/tdrive/`.
+**Status (24 November 2026): T-Drive downloaded, profiled and cleaned.** Microsoft's server refuses
+automated downloads (challenge 6), so the user downloaded it in a browser. The copy is a mirror
+("T-drive Taxi Trajectories.zip", 153,217,794 bytes, MD5 `96f5fd804fbe86b1107c88bc3865b0d0`). Its
+contents match the official release: 10,357 taxi files plus Microsoft's user_guide.pdf (version 1.0,
+12 August 2011).
+
+**Licence (user guide section 5, Microsoft Research License Agreement):** non-commercial use only
+(teaching and academic research are allowed). **"You may not distribute this Software or any derivative
+works in any form."** So raw data, cleaned data, transactions and synthetic data files never go on
+GitHub or anywhere public. They stay on the laptop and the user's own Ada account. Tables, figures and
+metrics in the report are fine; cite the two papers below.
 
 **Official files** (page: https://www.microsoft.com/en-us/research/publication/t-drive-trajectory-data-sample/):
 - `06.zip`, `07.zip`, `08.zip`, `09.zip`, `010.zip`, `011.zip`, `012.zip`, `013.zip`, `014.zip` under
@@ -37,7 +46,33 @@ MD5: extract `e3a0799ee79ed204159fe2ecbda11c36`; GraphML `846eaf436af874e173366d
 many. This confirms that columns must be restricted (decision 6): a smaller area and/or only the
 segments that taxis actually use often.
 
-### T-Drive
+### T-Drive profile (24 November 2026, scripts/profile_tdrive.py, all rows)
 
-To fill in once downloaded: files, rows, map-matching success rate, traversals, transactions, the
-chosen area, the number of segment columns, and the MD5s of the clean files.
+| Check | Result |
+|---|---|
+| Files / non-empty / taxis with data | 10,357 / 10,336 / 10,336 |
+| Rows | 17,662,984 |
+| Repeated (taxi, time) rows | 1,341,490 |
+| Zero coordinates / outside Beijing | 38,626 / 171,379 |
+| Inside the 5th Ring box | 12,623,453 (71%) |
+| Time range | 2008-02-02 13:30:44 to 2008-02-08 17:39:19 |
+| Interval between points (s) | median 212, mean 321; quantiles 0.25: 19, 0.75: 300, 0.99: 1,508 |
+| Gaps over 15 min / 30 min / 60 min | 309,415 / 132,578 / 82,113 |
+| Consecutive pairs moving under 10 m | 5,942,783 of 16,311,158 (36%, parked or waiting) |
+| Pairs implying over 150 km/h | 90,622 |
+| Points per taxi | median 1,262; 0.1 quantile 346; 0.99 quantile 7,960 |
+
+### T-Drive cleaning (24 November 2026, scripts/clean_tdrive.py)
+
+| Step | Points left |
+|---|---|
+| Raw | 17,662,984 |
+| Drop repeated (taxi, time) | 16,321,494 |
+| Drop zero coordinates | 16,284,564 |
+| Drop GPS spikes (speed in and out above 150 km/h), pass 1 / pass 2 | 16,237,199 / 16,237,199 |
+| Keep the 5th Ring box | **11,768,462 points, 10,207 taxis** |
+
+Output `data_clean/tdrive_points.parquet`, MD5 `80b6801a6f601e592de99201d846bc40`.
+
+Still to fill in: map-matching success rate, traversals, transactions, the chosen area, the number of
+segment columns.

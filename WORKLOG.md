@@ -14,3 +14,6 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 23 November 2026, 14:25 | Project venv | Created .venv (git-ignored) with osmnx and mlxtend, so the system Python is untouched | ENGINEERING.md |
 | 23 November 2026, 14:40 | OSM download via Overpass failed (502) | Not retried in a loop; switched to the BBBike Beijing extract, prepare_osm.py rewritten to build from the file | challenges.md 7 |
 | 23 November 2026, 20:00 | Road graph built from the BBBike extract | 34,135 intersections, 76,592 directed segments inside the 5th Ring box; output checked (extent, lengths, road types, one-way) | DATA.md "Road graph" |
+| 24 November 2026, 11:30 | T-Drive found and extracted | The user saved the zip in the repo root; moved to data_raw/tdrive/, contents checked (official release), licence read: no redistribution of data or derivatives | DATA.md |
+| 24 November 2026, 11:45 | T-Drive profiled and cleaned | 17.66M rows to 11.77M points inside the 5th Ring box, 10,207 taxis | DATA.md |
+| 24 November 2026, 11:50 | Map-matching: the user chose Python | Benchmark leuvenmapmatching on a sample before committing to it | DECISIONS.md 15 |

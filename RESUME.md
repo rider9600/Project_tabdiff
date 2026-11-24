@@ -26,7 +26,7 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 | Order | Module(s) | Contents | Predicted GPU h | Ready? |
 |---|---|---|---|---|
 | 0 | none | Open questions to the user: fabricated-results cleanup, decisions 9 and 10, empty report/ folder, GPU budget, teammate names | 0 | asked |
-| 1 | laptop | OSM Beijing road graph: **done** (data_raw/osm/, DATA.md). T-Drive: the user downloads it in a browser (challenge 6) | 0 | waiting for the user |
+| 1 | laptop | OSM Beijing road graph and T-Drive download, profile, cleaning: **done** (DATA.md) | 0 | done |
 | 2 | laptop | Map-matching, backtracking transactions, area choice (≥ 20k transactions), TabDiff dataset files | 0 | no |
 | 3 | laptop | Reddy et al. pipeline (FP-Growth, popularity, top-k), evaluation suite, baselines, tests | 0 | no |
 | 4 | E0 | Environment job on Ada | 0.2 | no |
