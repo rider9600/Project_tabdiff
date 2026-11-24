@@ -44,3 +44,12 @@ measured: this is stated as a limitation (decision 10).
 
 About 8 to 10 working days from the start of data work (docs/project_plan.md section 8). GPU budget on
 Ada: _to ask the user_.
+
+## 7. Possible comparisons (under discussion)
+
+- **Coordinate encoding vs edge encoding.** Instead of road-segment transactions, give TabDiff each
+  trip as GPS coordinates resampled to a fixed number of points (e.g. 16 points = 32 numeric columns),
+  map-match the generated coordinates, and apply the same evaluation. Related work: DiffTraj (Zhu et
+  al., NeurIPS 2023) generates GPS trajectories with diffusion and a sequence network; Diff-RNTraj adds
+  road-network constraints. Estimated cost: 1 to 2 h on Ada plus ~1 h map-matching, after the main run.
+
