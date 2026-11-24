@@ -30,6 +30,8 @@ def main() -> None:
                          "test: only sample and save samples.csv, without TabDiff's metrics and plots")
     ap.add_argument("--seed", type=int, default=None, help="seed torch, numpy and random before TabDiff starts")
     ap.add_argument("--samples-out", default="", help="test mode: copy the generated samples.csv here")
+    ap.add_argument("--train-batch-size", type=int, default=None, help="override [train.main] batch_size")
+    ap.add_argument("--sample-batch-size", type=int, default=None, help="override [sample] batch_size")
     a = ap.parse_args(own)
     train_mode = "test" not in passthrough[passthrough.index("--mode") + 1:passthrough.index("--mode") + 2] \
         if "--mode" in passthrough else True
@@ -61,6 +63,23 @@ def main() -> None:
         np.random.seed(a.seed)
         torch.manual_seed(a.seed)
         torch.cuda.manual_seed_all(a.seed)
+    if a.train_batch_size or a.sample_batch_size:
+        # Override TabDiff's config values in memory (the 4096 default does not fit 300 columns on 11 GB).
+        import src as tabdiff_src
+        import tabdiff.main as tabdiff_main_module
+
+        _load = tabdiff_src.load_config
+
+        def load_config(path):
+            cfg = _load(path)
+            if a.train_batch_size:
+                cfg["train"]["main"]["batch_size"] = a.train_batch_size
+            if a.sample_batch_size:
+                cfg["sample"]["batch_size"] = a.sample_batch_size
+            return cfg
+
+        tabdiff_src.load_config = load_config
+        tabdiff_main_module.src.load_config = load_config
     saved = {}
     if a.skip_tabdiff_eval:
         import tabdiff.trainer as tt
