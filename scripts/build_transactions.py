@@ -143,6 +143,11 @@ def main() -> None:
         "length_km_median": float(df["length_km"].median()) if len(df) else 0,
     }
     (out / "report.json").write_text(json.dumps(report, indent=2))
+    # MD5s that the Ada training job checks before it runs (rules/03, data check).
+    import hashlib
+    files = ["train.csv", "val.csv", "test.csv", "info.json", "edges.csv", "transactions.parquet"]
+    (out / "md5.json").write_text(json.dumps({f: hashlib.md5((out / f).read_bytes()).hexdigest() for f in files},
+                                             indent=2))
     print(json.dumps(report, indent=2))
 
 
