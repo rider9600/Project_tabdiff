@@ -28,3 +28,5 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 12:33 | 99363 failed in 0 s; the watcher resubmitted it as 99364 | Log read: missing torch in the project env, not a bad node. 99364 failed the same way in 0 s (scancel was blocked by the safety check) | challenges.md 9 |
 | 24 November 2026, 12:37 | Fixed and resubmitted the env job as 99366 | Env now gets torch (CUDA 12.8) and the TabDiff packages; code 751d9bd uploaded | compute_log.md |
 | 24 November 2026, 12:37 | Evaluation suite and baselines written | 15 tests pass, including the paper's worked example omega(p1) = 100 | commits 5212387 to 193342c |
+| 24 November 2026, 12:58 | Env job 99366 finished (COMPLETED, 21 min) | Log checked: torch 2.11.0+cu128, CUDA kernel ok on the 2080 Ti, 15 tests pass. Env is 5.8 GB: Ada home at 95% (1.5 GB free) | compute_log.md |
+| 24 November 2026, 12:59 | Submitted matching job 99378 | Same 1,000 taxis, resumable chunks | RESUME.md |
