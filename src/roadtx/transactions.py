@@ -56,6 +56,27 @@ def clip_runs(edges: Sequence[Edge], keep: set[Edge], min_edges: int = 2) -> lis
     return runs
 
 
+def classify(edges: Iterable[Edge]) -> str:
+    """Why a set of directed edges is or is not one drivable simple path.
+
+    Returns "valid", "empty", "branch" (a node with two edges leaving or entering it), "cycle" (the
+    edges close a loop) or "gap" (the edges form several separate pieces).
+    """
+    edges = list(set(edges))
+    if not edges:
+        return "empty"
+    outdeg, indeg = {}, {}
+    for u, v in edges:
+        outdeg[u] = outdeg.get(u, 0) + 1
+        indeg[v] = indeg.get(v, 0) + 1
+    if any(c > 1 for c in outdeg.values()) or any(c > 1 for c in indeg.values()):
+        return "branch"
+    if chain(edges) is not None:
+        return "valid"
+    starts = [u for u in outdeg if indeg.get(u, 0) == 0]
+    return "gap" if len(starts) > 1 else "cycle"
+
+
 def chain(edges: Iterable[Edge]) -> list[Hashable] | None:
     """Order a set of directed edges into one simple path; None if they do not form one.
 

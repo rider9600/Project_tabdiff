@@ -6,7 +6,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from roadtx.transactions import chain, clip_runs, split_backtracking  # noqa: E402
+from roadtx.transactions import chain, classify, clip_runs, split_backtracking  # noqa: E402
+
+
+class ClassifyTest(unittest.TestCase):
+    def test_cases(self):
+        self.assertEqual(classify([("A", "B"), ("B", "C"), ("C", "D")]), "valid")
+        self.assertEqual(classify([("A", "B"), ("C", "D")]), "gap")
+        self.assertEqual(classify([("A", "B"), ("B", "C"), ("B", "E")]), "branch")
+        self.assertEqual(classify([("A", "B"), ("B", "C"), ("C", "A")]), "cycle")
+        self.assertEqual(classify([]), "empty")
+        # a path plus a separate loop: no node branches, one start node, so the defect is the loop
+        self.assertEqual(classify([("A", "B"), ("C", "D"), ("D", "C")]), "cycle")
 
 
 class BacktrackingTest(unittest.TestCase):
