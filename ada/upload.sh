@@ -21,5 +21,5 @@ du -sh "$STAGE/code" "$ROOT/data_clean"
 
 ssh -i $KEY -o BatchMode=yes $HOST "df -h ~ | tail -1; mkdir -p ~/$PROJECT/logs ~/$PROJECT/data_clean"
 scp -i $KEY -o BatchMode=yes -q -r "$STAGE/code" $HOST:$PROJECT/
-scp -i $KEY -o BatchMode=yes -q "$ROOT"/data_clean/*.parquet "$ROOT"/data_clean/data_report.json $HOST:$PROJECT/data_clean/
+scp -i $KEY -o BatchMode=yes -q "$ROOT"/data_clean/*.parquet "$ROOT"/data_clean/*.graphml "$ROOT"/data_clean/data_report.json $HOST:$PROJECT/data_clean/
 ssh -i $KEY -o BatchMode=yes $HOST "cat ~/$PROJECT/code/VERSION; ls -l ~/$PROJECT/data_clean; du -sh ~/$PROJECT"
