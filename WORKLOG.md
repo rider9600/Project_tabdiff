@@ -41,3 +41,4 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 18:58 | Resubmitted training as 99856 | Watcher started; waiting for the first epoch timings | compute_log.md |
 | 24 November 2026, 18:55 | Training 99856 failed: CUDA out of memory (batch 4096) | Added --train-batch-size; resubmitted with 1024 as 99857 | challenges.md 11 |
 | 24 November 2026, 19:20 | 99857 trains: epoch 50 at 19:20, ~25 s per epoch | 8,000 epochs = ~55 h, too long. Own decision: 2,000 epochs (decision 20); cancelled 99857 (23 min) and submitted 99878 | DECISIONS.md 20 |
+| 24 November 2026, 22:45 | Records updated for a chat compaction | Training 99878 at epoch ~350+, running; RESUME.md has the full restart state | RESUME.md |

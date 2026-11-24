@@ -1,4 +1,4 @@
-# Resume here: live state (updated 24 November 2026, 11:55 IST)
+# Resume here: live state (updated 24 November 2026, 22:45 IST)
 
 A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries on with the queue below.
 
@@ -6,37 +6,35 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 
 | Item | State |
 |---|---|
-| Running now | Ada: matching job 99378, started 24 November 2026 12:58 IST; at 13:38, 2 of 20 chunks done (~16 min per chunk), so the time guard stops it after about 19 chunks (~18:15); one short second job for the rest. Env 99366 done. Earlier: 99351 env done; 99363 and 99364 matching failed at start (challenge 9). Laptop: map-matching of the same 1,000 taxis (7 workers, started 11:46 IST, chunks in data_clean/match_chunks/); it is stopped once the Ada matching job starts, and its finished chunks are uploaded to ~/tabdiff_roads/out/match/chunks |
-| Watcher | scripts/ada_watch.py on job 99378 (laptop, background), log in the session scratchpad watch_log.jsonl; Monitor armed on it. The laptop map-matching run was stopped at 12:32 (no chunk finished) |
-| Code on Ada | 751d9bd, uploaded 24 November 2026 12:35 IST, with tdrive_points.parquet and the road graph (MD5s in data_report.json) |
-| Ada disk | **24 GB used of 25 GB (1.5 GB free, 95%)** after the env with torch (5.8 GB). Watch checkpoint sizes; told the user |
-| Laptop copies | None (no results_ada/ yet) |
-| Compute used | 0 GPU h over 0 jobs |
-| Git | Branch `Abhay`, last pushed commit 4259d73. Local-only files (CLAUDE.md, DECISIONS.md, DISCUSSIONS.md, framework/) are in `.git/info/exclude` |
+| Running now | **Ada training job 99878** (tdr_train, tdrive_k300, EXP=e2000, 2,000 epochs, checkpoint every 500, batch 1,024). Started 24 Nov 19:22 IST; ~28 s per epoch; epoch 350 at 22:10 (loss 0.48). Expect TIMEOUT at 6 h (~01:20), watcher resubmits; total ~15.5 h, done ~11:00 on 25 Nov |
+| Exact resubmit command | `sbatch --export=ALL,PROJECT=tabdiff_roads,NAME=tdrive_k300,STEPS=2000,CHECK=500,EXP=e2000 tabdiff_roads/code/ada/train.sbatch` (resumes from newest model_<epoch>.pt) |
+| Watcher | scripts/ada_watch.py on 99878 (laptop background) + Monitor on scratchpad watch_log.jsonl. **Restart both in every new session** |
+| Code on Ada | fef0fd6 (latest pushed: see git log) |
+| Ada disk | 24 GB of 25 GB used (1.4 GB free). Each checkpoint (model + ema) ~100 MB; 4 expected |
+| Laptop copies | results_ada/match/ (matched_traversals.parquet + report) |
+| Compute used | see compute_log.md (Ada ~7.7 h so far) |
 
 ## 2. Finished
 
-| Part | Runs | GPU h | Where |
-|---|---|---|---|
-| Direction and public plan | none | 0 | docs/project_plan.md (pushed) |
-| Framework placed | none | 0 | rules/, records, ada/, scripts/ada_watch.py |
+| Part | Result | Where |
+|---|---|---|
+| Data | T-Drive cleaned (11.77M points); road graph 34,135 nodes / 76,592 segments | DATA.md |
+| Map-matching | Ada 99378 + 99794 (5.74 h): 1,000 taxis, 30,246 pieces, 98.6% of points matched | DATA.md, results_ada/match |
+| Table tdrive_k300 | 42,705 rows (train 29,378 / val 4,566 / test 8,761, by taxi), 300 columns + length_km | data_clean/tabdiff/tdrive_k300 (laptop and Ada) |
+| Code | transactions, evaluate, baselines, graph_sampler (+ tests, 19 pass); runner run_tabdiff.py | src/roadtx, scripts, tests |
 
 ## 3. Left, in this order
 
-| Order | Module(s) | Contents | Predicted GPU h | Ready? |
-|---|---|---|---|---|
-| 0 | none | Open questions to the user: fabricated-results cleanup, decisions 9 and 10, empty report/ folder, GPU budget, teammate names | 0 | asked |
-| 1 | laptop | OSM Beijing road graph and T-Drive download, profile, cleaning: **done** (DATA.md) | 0 | done |
-| 2 | laptop | Map-matching: **running**. Next: backtracking transactions, area choice (≥ 20k transactions), TabDiff dataset files | 0 | in progress |
-| 3 | laptop | Reddy et al. pipeline (FP-Growth, popularity, top-k), evaluation suite, baselines, tests | 0 | no |
-| 4 | E0 | Environment job on Ada | 0.2 | no |
-| 5 | E1 | Benchmark job: speed, memory, exact resume | 0.5 | no |
-| 6 | E2 | Pilot training | to measure | no |
-| 7 | E3 | Main training, split into 6 h jobs | to measure | no |
-| 8 | E4 | Sampler comparison | small | no |
+| Order | Step | How |
+|---|---|---|
+| 1 | Finish training (99878 + resubmits) | watcher |
+| 2 | Sampling job on Ada for each checkpoint (500..2000) on the **validation** split: default sampler and graph-aware (strength 0.5), seed 0 | write ada/sample.sbatch: `run_tabdiff.py [--graph-edges ...] --skip-tabdiff-eval --seed S --sample-batch-size 2000 --samples-out ... -- --dataname tdrive_k300 --mode test --ckpt_path <model_E.pt> --no_wandb --exp_name e2000` |
+| 3 | Pick best checkpoint by our metrics on val (validity + pattern overlap) | scripts/evaluate_synthetic.py |
+| 4 | Final: best checkpoint, 3 seeds x {default, graph-aware}, evaluate vs real_test, independent, markov | evaluate_synthetic.py --synthetic label=path ... |
+| 5 | Report + slides; remove placeholder results (needs the user's OK) | docs/ |
 
 ## 4. How to restart
 
-1. Check `squeue` and `sacct` on Ada and `git status`.
-2. Start a watcher for any running job, or submit the next ready module.
-3. Before step 1 of the queue, make sure the open decisions have been answered.
+1. Check `squeue`/`sacct` on Ada and `git status`.
+2. Start a watcher for any running job (command above) and arm a Monitor on its log.
+3. Continue with section 3.
