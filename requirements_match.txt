@@ -1,0 +1,10 @@
+# Python packages for data preparation and map-matching (laptop .venv and Ada ~/envs/tabdiff_roads)
+osmnx==2.1.2
+leuvenmapmatching==1.1.4
+rtree
+pyproj
+pandas
+pyarrow
+numpy
+networkx
+mlxtend==0.25.0
