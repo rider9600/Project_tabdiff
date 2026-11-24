@@ -6,9 +6,9 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 
 | Item | State |
 |---|---|
-| Running now | Ada: environment job 99351 (tdr_env), submitted 24 November 2026 12:17 IST. Laptop: map-matching of the same 1,000 taxis (7 workers, started 11:46 IST, chunks in data_clean/match_chunks/); it is stopped once the Ada matching job starts, and its finished chunks are uploaded to ~/tabdiff_roads/out/match/chunks |
-| Watcher | scripts/ada_watch.py on job 99351 (laptop, background), log in the session scratchpad watch_log.jsonl; Monitor armed on it |
-| Code on Ada | 680d943, uploaded 24 November 2026 12:16 IST, with tdrive_points.parquet and the road graph (MD5s in data_report.json) |
+| Running now | Ada: environment rebuild 99366 (with torch), submitted 24 November 2026 12:37 IST; then the matching job. Earlier: 99351 env done; 99363 and 99364 matching failed at start (challenge 9). Laptop: map-matching of the same 1,000 taxis (7 workers, started 11:46 IST, chunks in data_clean/match_chunks/); it is stopped once the Ada matching job starts, and its finished chunks are uploaded to ~/tabdiff_roads/out/match/chunks |
+| Watcher | scripts/ada_watch.py on job 99366 (laptop, background), log in the session scratchpad watch_log.jsonl; Monitor armed on it. The laptop map-matching run was stopped at 12:32 (no chunk finished) |
+| Code on Ada | 751d9bd, uploaded 24 November 2026 12:35 IST, with tdrive_points.parquet and the road graph (MD5s in data_report.json) |
 | Ada disk | 18 GB used of 25 GB (7.3 GB free) before the upload; project folder 133 MB |
 | Laptop copies | None (no results_ada/ yet) |
 | Compute used | 0 GPU h over 0 jobs |

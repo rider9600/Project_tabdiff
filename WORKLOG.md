@@ -23,3 +23,8 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 24 November 2026, 11:55 | Transaction builder written and tested | Smoke sample: 350 transactions to 105 gap-free rows in a 4 km area with 100 columns; library tests pass (paper Figure 1 example reproduced) | DATA.md |
 | 24 November 2026, 12:06 | The user asked to run map-matching on Ada | Ada checked: 7.3 GB free, queue empty. Added the time guard, data report, env.sbatch and match.sbatch (commits 9379226, 7244281, 11d4843). Waiting for the go to upload and submit (rules: show the sbatch before the first submission) | DECISIONS.md 18 |
 | 24 November 2026, 12:17 | Uploaded to Ada and submitted the environment job 99351 | The user gave standing permission (no go needed); code 680d943 and data uploaded, MD5s recorded; watcher and monitor started | compute_log.md |
+| 24 November 2026, 12:26 | Env job 99351 finished (COMPLETED, 9 min) | Log checked: imports and tests ok | compute_log.md |
+| 24 November 2026, 12:31 | Submitted match job 99363; stopped the laptop run | No laptop chunk had finished, so nothing to upload | |
+| 24 November 2026, 12:33 | 99363 failed in 0 s; the watcher resubmitted it as 99364 | Log read: missing torch in the project env, not a bad node. 99364 failed the same way in 0 s (scancel was blocked by the safety check) | challenges.md 9 |
+| 24 November 2026, 12:37 | Fixed and resubmitted the env job as 99366 | Env now gets torch (CUDA 12.8) and the TabDiff packages; code 751d9bd uploaded | compute_log.md |
+| 24 November 2026, 12:37 | Evaluation suite and baselines written | 15 tests pass, including the paper's worked example omega(p1) = 100 | commits 5212387 to 193342c |
