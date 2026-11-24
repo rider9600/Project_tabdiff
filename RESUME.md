@@ -6,10 +6,10 @@ A new session reads CLAUDE.md, this file and the end of WORKLOG.md, then carries
 
 | Item | State |
 |---|---|
-| Running now | Laptop: map-matching of 1,000 taxis (scripts/match_tdrive.py, 7 workers), started 24 November 2026 11:46 IST, log data_clean/match_run.log, resumable: rerun the same command to continue |
-| Watcher | None |
-| Code on Ada | None uploaded. Folder `~/tabdiff_roads` not yet created |
-| Ada disk | Not checked yet (`df -h ~` before the first upload) |
+| Running now | Ada: environment job 99351 (tdr_env), submitted 24 November 2026 12:17 IST. Laptop: map-matching of the same 1,000 taxis (7 workers, started 11:46 IST, chunks in data_clean/match_chunks/); it is stopped once the Ada matching job starts, and its finished chunks are uploaded to ~/tabdiff_roads/out/match/chunks |
+| Watcher | scripts/ada_watch.py on job 99351 (laptop, background), log in the session scratchpad watch_log.jsonl; Monitor armed on it |
+| Code on Ada | 680d943, uploaded 24 November 2026 12:16 IST, with tdrive_points.parquet and the road graph (MD5s in data_report.json) |
+| Ada disk | 18 GB used of 25 GB (7.3 GB free) before the upload; project folder 133 MB |
 | Laptop copies | None (no results_ada/ yet) |
 | Compute used | 0 GPU h over 0 jobs |
 | Git | Branch `Abhay`, last pushed commit 4259d73. Local-only files (CLAUDE.md, DECISIONS.md, DISCUSSIONS.md, framework/) are in `.git/info/exclude` |
