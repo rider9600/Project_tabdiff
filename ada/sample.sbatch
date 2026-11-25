@@ -1,6 +1,6 @@
 #!/bin/bash
 # TabDiff sampling job (module "sample"). For every checkpoint listed in EPOCHS, every sampler in
-# SAMPLERS (default, graph) and every seed in SEEDS, generates one synthetic table and writes it to
+# SAMPLERS (default, graph, random) and every seed in SEEDS, generates one synthetic table and writes it to
 # $PROJ/out/sample/$NAME/$EXP/<sampler>_e<epoch>_s<seed>.csv with NSAMP rows (default 4,566, the validation
 # size). Tables that already exist are skipped, so a job that hits the time limit can just be resubmitted.
 #     sbatch --export=ALL,PROJECT=tabdiff_roads,NAME=tdrive_k300,EXP=e2000,EPOCHS="500 750",SEEDS=0 \
@@ -35,10 +35,10 @@ for E in $EPOCHS; do
   [ -f "$CK" ] || { echo "=== missing $CK, skipped"; continue; }
   for S in $SEEDS; do
     for SM in $SAMPLERS; do
-      LB=$SM; [ "$SM" = graph ] && [ "$STRENGTH" != 0.5 ] && LB=graph$STRENGTH   # e.g. graph0.25
+      LB=$SM; [ "$SM" != default ] && [ "$STRENGTH" != 0.5 ] && LB=$SM$STRENGTH   # e.g. graph0.25, random0.1
       OUT="$PROJ/out/sample/$NAME/$EXP/${LB}_e${E}_s${S}.csv"
       [ -f "$OUT" ] && { echo "=== exists $OUT"; continue; }
-      G=(); [ "$SM" = graph ] && G=(--graph-edges "$EDGES" --graph-strength "$STRENGTH")
+      G=(); [ "$SM" != default ] && G=(--graph-edges "$EDGES" --graph-strength "$STRENGTH" --remask-mode "$SM")
       T0=$(date +%s)
       python -u scripts/run_tabdiff.py "${G[@]}" --skip-tabdiff-eval --seed "$S" --sample-batch-size 2000 \
           --samples-out "$OUT" -- --dataname "$NAME" --mode test --ckpt_path "$CK" --no_wandb --exp_name "$EXP" --num_samples_to_generate "$NSAMP"

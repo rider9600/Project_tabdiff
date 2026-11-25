@@ -25,6 +25,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--graph-edges", default="")
     ap.add_argument("--graph-strength", type=float, default=0.5)
+    ap.add_argument("--remask-mode", choices=["graph", "random"], default="graph",
+                    help="random: control arm, same number of re-masked columns per row at random places")
     ap.add_argument("--skip-tabdiff-eval", action="store_true",
                     help="training: skip TabDiff's in-loop sample evaluation (checkpoints are still saved); "
                          "test: only sample and save samples.csv, without TabDiff's metrics and plots")
@@ -106,9 +108,9 @@ def main() -> None:
         from roadtx import graph_sampler
 
         edges = pd.read_csv(Path(a.graph_edges).resolve())
-        graph_sampler.install(ucd.UnifiedCtimeDiffusion, edges, a.graph_strength)
+        graph_sampler.install(ucd.UnifiedCtimeDiffusion, edges, a.graph_strength, a.remask_mode)
         stats = graph_sampler.STATS
-        print(f"graph-aware sampler installed: {len(edges)} segments, strength {a.graph_strength}", flush=True)
+        print(f"re-masking sampler installed ({a.remask_mode}): {len(edges)} segments, strength {a.graph_strength}", flush=True)
 
     os.chdir(TABDIFF)
     sys.argv = ["main.py"] + passthrough
