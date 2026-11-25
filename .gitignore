@@ -46,3 +46,7 @@ runs/
 baseline_tabdiff/data/Info/tdrive*.json
 baseline_tabdiff/data/Info/smoke*.json
 .venv*/
+
+# DiffTraj pre-trained weights (downloaded on Ada, not versioned)
+external/DiffTraj/*.pt
+external/DiffTraj/*.npy
