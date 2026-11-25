@@ -69,3 +69,7 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 - Default sampler: epochs 500-750 are 60% drivable, gaps 38%, recover 8.7% of real multi-segment frequent itemsets, busy-road Spearman 0.57-0.78. From epoch 1000 on: 6% drivable, gaps 91%, no frequent itemsets, Spearman ~0.81. Longer training improved per-segment frequencies but broke the joint structure within rows.
 - Graph-aware sampler (0.5): 96-97% of non-empty rows drivable, gaps 2-3%, but rows are short (2.0 segments at 500-750, 0.8 from 1000 on, with 25% empty) and no frequent itemsets. It trades length for validity.
 - Selection score picks default @ 750 and graph @ 1750. Next: tune graph strength (0.1, 0.25) at epoch 750 on validation (jobs 100888 and one more), then the final 3-seed run on test.
+
+## 25 November 2026, 15:00 IST: strength tuning (val, epoch 750) and final run
+- 100888 (strength 0.1, 6.9 min) and 100893 (0.25, 6.6 min). Results: 0.1 -> 2.56 segments/row, 88% of non-empty rows drivable, Spearman 0.43; 0.25 -> 2.20, 94%, 0.23; 0.5 -> 2.01, 97%, 0.14. No setting recovers frequent itemsets. Chosen: 0.1 (decision 23).
+- Final sampling job 100904 submitted 15:01: epoch 750, {default, graph-aware 0.1} x seeds 10, 11, 12, 8,761 rows each.

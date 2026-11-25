@@ -21,7 +21,9 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 100223 | train, resume from model_500, checkpoint every 250 | gnode049 / 2080 Ti | 25 Nov 01:24 | 25 Nov 07:24 | 6.00 | TIMEOUT (expected) | epochs 500 to ~1260; checkpoints 750, 1000, 1250 | fef0fd6 | resubmitted by the watcher |
 | 100439 | train, resume from model_1250 | gnode049 / 2080 Ti | 25 Nov 07:27 | 25 Nov 13:18 | 5.85 | COMPLETED | epochs 1250 to 2000; checkpoints 1500, 1750, 2000 | 3246067 | training done: 2,000 epochs over 4 jobs, 17.85 h of GPU time (99878 6.00 + 100223 6.00 + 100439 5.85) |
 | 100792 | sample (tdr_sample), checkpoints 500 to 2000 x {default, graph 0.5}, seed 0, 4,566 rows each | gnode043 / 2080 Ti | 25 Nov 13:20 | 25 Nov 14:43 | 1.37 | COMPLETED | 14 tables, 322 to 372 s each | 732aa44 | checkpoint choice on val |
-| 100888 | sample, epoch 750, graph strength 0.1, seed 0 | | 25 Nov 14:52 (submitted) | | | queued | | 714b90c | strength tuning on val |
+| 100888 | sample, epoch 750, graph strength 0.1, seed 0 | 2080 Ti | 25 Nov 14:46 | 25 Nov 14:53 | 0.12 | COMPLETED | 1 table, 398 s | 714b90c | strength tuning on val |
+| 100893 | sample, epoch 750, graph strength 0.25, seed 0 | 2080 Ti | 25 Nov 14:53 | 25 Nov 15:00 | 0.11 | COMPLETED | 1 table, 376 s | 714b90c | strength tuning on val |
+| 100904 | sample (final), epoch 750, {default, graph 0.1} x seeds 10-12, 8,761 rows | | 25 Nov 15:01 (submitted) | | | running | | 714b90c | final tables for the test evaluation |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 
