@@ -21,8 +21,8 @@ Graph-aware strength at epoch 750: 0.1 gives 2.56 segments and 88% drivable non-
 
 **Note on the samplers:** TabDiff disables its own stochastic sampler for tables with no numerical columns
 (ours), so "default sampler" below means TabDiff with no re-masking. "Graph-aware" re-masks only the
-segments flagged by the road graph. A matched random re-masking arm (same count, random segments) is
-being run to separate the effect of re-masking from that of the graph.
+segments flagged by the road graph. "Random re-masking" is the control: at each step it re-masks as many
+decided segments per row as the graph rule flags in that row's current state, chosen at random.
 
 ## Test results
 
@@ -32,7 +32,23 @@ being run to separate the effect of re-masking from that of the graph.
 | Independent baseline | 5.8% | 92.2% | 4.28 | 0.91 | 0.83 | 0.00 | n/a | 0.50 | 0.1% |
 | Markov baseline | 100% | 0% | 4.31 | 0.92 | 0.85 | 0.51 | 94% | 0.74 | 92.8% |
 | TabDiff, default sampler | 61% | 37% | 3.86 | 0.81 | 0.48 | 0.10 | 44% | 0.85 | 47% |
+| TabDiff, random re-masking 0.1 (control) | 63% | 35% | 3.85 | 0.81 | 0.48 | 0.11 | 36% | 0.85 | 49% |
 | TabDiff, graph-aware 0.1 | 87% | 12% | 2.57 | 0.52 | 0.23 | 0.03 | 100% | 0.50 | 62% |
+
+## Ablation: does the graph matter, or just re-masking?
+
+Same checkpoint (750), seeds (10, 11, 12) and strength (0.1); mean ± standard deviation over seeds.
+
+| Arm | Re-masking | Re-masked share per step | Drivable rows | Segments / row | Busy roads: Spearman |
+|---|---|---|---|---|---|
+| A. TabDiff as it runs on this table | none | 0 | 61.0% ± 0.3 | 3.86 | 0.81 |
+| B. Random re-masking (control) | random decided segments | 0.49% of segments flagged | 62.6% ± 0.3 | 3.85 | 0.81 |
+| C. Graph-aware | segments flagged by the graph | 0.16% of segments flagged | 87.0% ± 0.3 | 2.57 | 0.52 |
+
+Random re-masking leaves TabDiff almost unchanged (+1.6 points of drivable rows) even though it
+re-masks about 3 times as many segments as the graph-aware arm. The graph-aware arm adds 26 points. So the
+gain comes from the graph targeting, not from re-masking as such. Its cost, shorter rows and weaker
+busy-road agreement, also comes from the targeting: the flagged segments are mostly switched off.
 
 ## Reading
 
