@@ -24,6 +24,7 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 100888 | sample, epoch 750, graph strength 0.1, seed 0 | 2080 Ti | 25 Nov 14:46 | 25 Nov 14:53 | 0.12 | COMPLETED | 1 table, 398 s | 714b90c | strength tuning on val |
 | 100893 | sample, epoch 750, graph strength 0.25, seed 0 | 2080 Ti | 25 Nov 14:53 | 25 Nov 15:00 | 0.11 | COMPLETED | 1 table, 376 s | 714b90c | strength tuning on val |
 | 100904 | sample (final), epoch 750, {default, graph 0.1} x seeds 10-12, 8,761 rows | | 25 Nov 15:01 | 25 Nov 15:59 | 0.97 | COMPLETED | 6 tables, 565 to 630 s each | 714b90c | final tables for the test evaluation |
+| 101112 | sample, ablation arm B: random re-masking 0.1, epoch 750, seeds 10-12, 8,761 rows | 2080 Ti | 25 Nov 16:57 | 25 Nov 17:32 | 0.59 | COMPLETED | 3 tables, 671 to 731 s each | d416627 | user-requested ablation |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 
@@ -46,6 +47,7 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 25 Nov, 16:05 to 16:10 | Final evaluation, first try (0 popular-path queries) | scripts/evaluate_synthetic.py | 276 s | results_ada/final | query search bug |
 | 25 Nov, 16:12 to 16:17 | Final evaluation, 26 queries (all omega 0) | scripts/evaluate_synthetic.py | 297 s | | minF rule zeroes every path |
 | 25 Nov, 16:30 to 16:35 | Final evaluation, with omega without minF | scripts/evaluate_synthetic.py | 301 s | results_ada/final/evaluation.json | final numbers |
+| 25 Nov, 17:35 to 17:42 | Evaluation with ablation arm B (9 TabDiff tables) | scripts/evaluate_synthetic.py | 432 s | results_ada/final/evaluation.json | |
 
 ## Time summary (update after every run)
 

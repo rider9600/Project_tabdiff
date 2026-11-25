@@ -78,3 +78,7 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 - Test split, 8,761 rows per table, 3 seeds each for TabDiff. Results in docs/results_tdrive.md; raw in results_ada/final/evaluation.json.
 - Popular-path evaluation fixed: queries were never found by random probing (0 queries); now enumerated (26 pairs, one per distinct set of alternatives). With minF = 423 every candidate path has a segment below minF, so Reddy et al.'s omega is 0 everywhere; added omega without the minF rule (decision 25).
 - Headline: TabDiff default 61% drivable, Spearman 0.81, itemset Jaccard 0.10; graph-aware 0.1 87% drivable, 2.57 segments/row, Spearman 0.52; Markov baseline best on fidelity.
+
+## 25 November 2026, 17:45 IST: ablation arm B (job 101112, 35 min; evaluation 432 s)
+- Random re-masking (count matched to the graph rule's flags in the current state, random decided segments): 62.6% drivable, 3.85 segments/row, Spearman 0.81; re-masked share 0.49% per step (graph-aware 0.16%).
+- vs A (no re-masking) 61.0% and C (graph-aware) 87.0%. The validity gain comes from the graph targeting. Written into docs/results_tdrive.md.
