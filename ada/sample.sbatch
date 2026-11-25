@@ -2,7 +2,7 @@
 # TabDiff sampling job (module "sample"). For every checkpoint listed in EPOCHS, every sampler in
 # SAMPLERS (default, graph) and every seed in SEEDS, generates one synthetic table and writes it to
 # $PROJ/out/sample/$NAME/$EXP/<sampler>_e<epoch>_s<seed>.csv. Tables that already exist are skipped,
-# so a job that hits the time limit can simply be resubmitted. Submit with
+# NSAMP rows per table (default 4,566 = the validation split). So a job that hits the time limit can simply be resubmitted. Submit with
 #     sbatch --export=ALL,PROJECT=tabdiff_roads,NAME=tdrive_k300,EXP=e2000,EPOCHS="500 750",SEEDS=0 \
 #         tabdiff_roads/code/ada/sample.sbatch
 #SBATCH --job-name=tdr_sample
@@ -19,7 +19,7 @@
 
 set -euo pipefail
 : "${PROJECT:?set PROJECT}"; : "${NAME:?set NAME}"; : "${EPOCHS:?set EPOCHS}"
-EXP=${EXP:-main}; SEEDS=${SEEDS:-0}; SAMPLERS=${SAMPLERS:-"default graph"}; STRENGTH=${STRENGTH:-0.5}
+EXP=${EXP:-main}; SEEDS=${SEEDS:-0}; NSAMP=${NSAMP:-4566}; SAMPLERS=${SAMPLERS:-"default graph"}; STRENGTH=${STRENGTH:-0.5}
 source /home2/cs9442.01/$PROJECT/code/ada/common.sh
 [ -f "$HOME/envs/$PROJECT/.ready" ] || { echo "~/envs/$PROJECT not ready: run the env job first"; exit 1; }
 export WANDB_MODE=disabled PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
@@ -40,7 +40,7 @@ for E in $EPOCHS; do
       G=(); [ "$SM" = graph ] && G=(--graph-edges "$EDGES" --graph-strength "$STRENGTH")
       T0=$(date +%s)
       python -u scripts/run_tabdiff.py "${G[@]}" --skip-tabdiff-eval --seed "$S" --sample-batch-size 2000 \
-          --samples-out "$OUT" -- --dataname "$NAME" --mode test --ckpt_path "$CK" --no_wandb --exp_name "$EXP"
+          --samples-out "$OUT" -- --dataname "$NAME" --mode test --ckpt_path "$CK" --no_wandb --exp_name "$EXP" --num_samples_to_generate "$NSAMP"
       echo "=== done $OUT in $(( $(date +%s) - T0 )) s"
     done
   done
