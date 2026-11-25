@@ -65,7 +65,8 @@ def main() -> None:
 
     keys = [("trips", "share_valid"), ("busy_roads", "top25_overlap"), ("busy_roads", "spearman_segment_use"),
             ("patterns", "jaccard_multi_itemsets"), ("patterns", "contiguity_maximal_syn"),
-            ("popular_paths", "kendall_tau_mean"), ("privacy", "exact_copy_share")]
+            ("popular_paths", "kendall_tau_mean"), ("popular_paths", "kendall_tau_mean_no_minf"),
+            ("trips", "segments_per_row_mean"), ("trips", "share_gap"), ("privacy", "exact_copy_share")]
     table = {label: {f"{a_}.{b_}": round(float(pd.Series([r[a_][b_] for r in runs]).mean()), 4) for a_, b_ in keys}
              for label, runs in results["methods"].items()}
     print(f"minF = {min_count} ({rule}); {len(queries)} queries; {results['seconds']} s")
