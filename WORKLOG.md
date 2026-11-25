@@ -45,3 +45,8 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 | 25 November 2026, 01:21 | Training 99878 hit the 6 h limit (TIMEOUT) at ~epoch 770 | Watcher crashed (decoding); fixed; resubmitted as 100223 from model_500 with checkpoints every 250 epochs | challenges.md 13 |
 | 25 November 2026 | The user proposed generating GPS coordinates directly | Recorded as a possible comparison (DiffTraj-style coordinate encoding); open for discussion | DISCUSSIONS.md, Plan.md 7 |
 | 25 November 2026, 02:15 | Records updated for a chat compaction | Training 100223 at epoch 600/2000, loss 0.44; RESUME.md current | RESUME.md |
+
+## 25 November 2026, 11:45 IST
+- 100223 hit TIMEOUT at 07:24 (epoch ~1260; checkpoints 750, 1000, 1250); watcher resubmitted as 100439 (07:27, gnode049).
+- 11:43: 100439 at epoch 1797/2000, loss ~1.05 total (DLoss 0.07); checkpoints up to 1750. Expected end ~13:20, just inside the 6 h limit (13:27); if it times out, the watcher resubmits and the last epochs take minutes.
+- ada/sample.sbatch written and pushed (3246067). Laptop CPU check of sampling with model_1750 and the graph-aware sampler (2,000 rows) running, to catch bugs before the Ada sampling job.
