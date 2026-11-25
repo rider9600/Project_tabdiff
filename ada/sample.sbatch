@@ -35,7 +35,8 @@ for E in $EPOCHS; do
   [ -f "$CK" ] || { echo "=== missing $CK, skipped"; continue; }
   for S in $SEEDS; do
     for SM in $SAMPLERS; do
-      OUT="$PROJ/out/sample/$NAME/$EXP/${SM}_e${E}_s${S}.csv"
+      LB=$SM; [ "$SM" = graph ] && [ "$STRENGTH" != 0.5 ] && LB=graph$STRENGTH   # e.g. graph0.25
+      OUT="$PROJ/out/sample/$NAME/$EXP/${LB}_e${E}_s${S}.csv"
       [ -f "$OUT" ] && { echo "=== exists $OUT"; continue; }
       G=(); [ "$SM" = graph ] && G=(--graph-edges "$EDGES" --graph-strength "$STRENGTH")
       T0=$(date +%s)
