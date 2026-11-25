@@ -55,6 +55,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 25 Nov, 17:35 to 17:42 | Evaluation with ablation arm B (9 TabDiff tables) | scripts/evaluate_synthetic.py | 432 s | results_ada/final/evaluation.json | |
 | 25 Nov, 20:40 | DiffTraj export (200-point trips + 8 attributes) | scripts/difftraj_export.py | 16.4 s | data_clean/difftraj/tdrive_k300 | |
 | 25 Nov, 20:55 | Decoder check on 300 real val trips | scripts/difftraj_decode.py --check val | 51.3 s | | Jaccard 0.94, exact rows 77% |
+| 25 Nov, 22:10 to 22:41 | Decode DiffTraj B samples (3 x 8,761) | scripts/difftraj_decode.py | 599 + 606 + 621 s | results_ada/difftraj/finetune | 7 workers |
+| 25 Nov, 22:42 to 22:49 | Evaluation with DiffTraj B | scripts/evaluate_synthetic.py | 438 s | results_ada/difftraj/finetune/evaluation.json | |
 
 ## Time summary (update after every run)
 

@@ -89,3 +89,9 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 - Decoder (map-matching back to the 300 columns), checked on 300 real val trips: Jaccard 0.94, exact rows 77%, 4.64 vs 4.40 segments per row. This is the ceiling for DiffTraj after decoding.
 - Batch 1024 and 512 ran out of memory on the 2080 Ti; kept the authors' batch 1024 with gradient accumulation (8 x 128). Ada home 98% full: checkpoints on node scratch, only final weights (65 MB) kept.
 - Job 101372 (B, fine-tune 50 epochs): 55 s per epoch, loss 0.023 -> 0.006 after 2 epochs. C (200 epochs, ~3.1 h) next.
+
+## 25 November 2026, 22:45 IST: DiffTraj B (fine-tuned) evaluated on test
+- Decoding: ~10 min per seed (599-621 s), 99.8% of points matched, 7.8% empty rows (trips on roads outside the 300 columns).
+- Test (mean of 3 seeds): drivable 83.8% (91% of non-empty), gaps 8.3%, 3.86 segments/row, busy-road Spearman 0.62, top-25 0.48, itemset Jaccard 0.335, maximal patterns contiguous 84%, tau (no minF) 0.50, exact copies 63%, DCR closer to train 8.5% (TabDiff 3.6%).
+- Caveat: map-matching returns a connected road path, so part of DiffTraj's drivability comes from the decoder; its gaps only arise where the path leaves and re-enters the 300 columns.
+- Evaluation run 438 s.
