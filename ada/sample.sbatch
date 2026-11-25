@@ -1,8 +1,8 @@
 #!/bin/bash
 # TabDiff sampling job (module "sample"). For every checkpoint listed in EPOCHS, every sampler in
 # SAMPLERS (default, graph) and every seed in SEEDS, generates one synthetic table and writes it to
-# $PROJ/out/sample/$NAME/$EXP/<sampler>_e<epoch>_s<seed>.csv. Tables that already exist are skipped,
-# NSAMP rows per table (default 4,566 = the validation split). So a job that hits the time limit can simply be resubmitted. Submit with
+# $PROJ/out/sample/$NAME/$EXP/<sampler>_e<epoch>_s<seed>.csv with NSAMP rows (default 4,566, the validation
+# size). Tables that already exist are skipped, so a job that hits the time limit can just be resubmitted.
 #     sbatch --export=ALL,PROJECT=tabdiff_roads,NAME=tdrive_k300,EXP=e2000,EPOCHS="500 750",SEEDS=0 \
 #         tabdiff_roads/code/ada/sample.sbatch
 #SBATCH --job-name=tdr_sample
