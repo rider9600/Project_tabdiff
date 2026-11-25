@@ -62,3 +62,10 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 - Training COMPLETED (100439, 13:18): 2,000 epochs, checkpoints every 250 from 500 to 2000. Total 17.85 GPU hours over 3 jobs.
 - Watcher crashed again when printing tqdm characters to the Windows console (cp1252); fixed with UTF-8 stdout (9435484). Challenge 14.
 - Sampling job 100792 submitted: 7 checkpoints x {default, graph-aware 0.5}, seed 0, 4,566 rows each (validation size).
+
+## 25 November 2026, 14:50 IST: checkpoint sweep on validation (job 100792, 82 min, 14 tables)
+- Each table 4,566 rows; 322 to 372 s per table on the 2080 Ti. Scores from scripts/select_checkpoint.py (22 s); full table in results_ada/sample/e2000/selection.json.
+- **Correction of the 12:00 reading:** the short rows came from the graph-aware sampler, not from the model. The default sampler matches real row length (4.3 vs 4.33 segments).
+- Default sampler: epochs 500-750 are 60% drivable, gaps 38%, recover 8.7% of real multi-segment frequent itemsets, busy-road Spearman 0.57-0.78. From epoch 1000 on: 6% drivable, gaps 91%, no frequent itemsets, Spearman ~0.81. Longer training improved per-segment frequencies but broke the joint structure within rows.
+- Graph-aware sampler (0.5): 96-97% of non-empty rows drivable, gaps 2-3%, but rows are short (2.0 segments at 500-750, 0.8 from 1000 on, with 25% empty) and no frequent itemsets. It trades length for validity.
+- Selection score picks default @ 750 and graph @ 1750. Next: tune graph strength (0.1, 0.25) at epoch 750 on validation (jobs 100888 and one more), then the final 3-seed run on test.

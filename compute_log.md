@@ -20,7 +20,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 99878 | train, batch 1024, 2,000 epochs, checkpoint every 500 (EXP=e2000) | gnode043 / 2080 Ti | 24 Nov 19:21 | 25 Nov 01:21 | 6.00 | TIMEOUT (expected) | about 770 epochs; checkpoint 500 saved (loss 0.43 at 550); ~28 s per epoch | fef0fd6 | watcher crashed at the end (challenge 13); resubmitted by hand |
 | 100223 | train, resume from model_500, checkpoint every 250 | gnode049 / 2080 Ti | 25 Nov 01:24 | 25 Nov 07:24 | 6.00 | TIMEOUT (expected) | epochs 500 to ~1260; checkpoints 750, 1000, 1250 | fef0fd6 | resubmitted by the watcher |
 | 100439 | train, resume from model_1250 | gnode049 / 2080 Ti | 25 Nov 07:27 | 25 Nov 13:18 | 5.85 | COMPLETED | epochs 1250 to 2000; checkpoints 1500, 1750, 2000 | 3246067 | training done: 2,000 epochs over 4 jobs, 17.85 h of GPU time (99878 6.00 + 100223 6.00 + 100439 5.85) |
-| 100792 | sample (tdr_sample), checkpoints 500 to 2000 x {default, graph 0.5}, seed 0, 4,566 rows each | | 25 Nov 13:20 (submitted) | | | running | | 732aa44 | 14 tables, for choosing the checkpoint |
+| 100792 | sample (tdr_sample), checkpoints 500 to 2000 x {default, graph 0.5}, seed 0, 4,566 rows each | gnode043 / 2080 Ti | 25 Nov 13:20 | 25 Nov 14:43 | 1.37 | COMPLETED | 14 tables, 322 to 372 s each | 732aa44 | checkpoint choice on val |
+| 100888 | sample, epoch 750, graph strength 0.1, seed 0 | | 25 Nov 14:52 (submitted) | | | queued | | 714b90c | strength tuning on val |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 
@@ -51,7 +52,7 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | Ada environment setup | Ada | 0.52 h over 2 jobs (+ 2 failed starts of 0 s) | done |
 | Transaction table | Laptop | 62 s (build_transactions.py) | done: 42,705 rows |
 | TabDiff training | Ada | 17.85 h over 3 jobs (99878, 100223, 100439) + 0.41 h of failed/cancelled starts | done: 2,000 epochs |
-| Sampling (default and graph-aware) | Ada | not started | |
+| Sampling (default and graph-aware) | Ada | 1.37 h (checkpoint sweep) | running: strength tuning |
 | Evaluation | Laptop | smoke test 548 s | |
 
 Before this project's Ada work, the teammate ran the TabDiff baseline (Adult, 8,000 epochs) on Google
