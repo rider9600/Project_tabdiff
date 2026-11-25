@@ -50,3 +50,10 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 - 100223 hit TIMEOUT at 07:24 (epoch ~1260; checkpoints 750, 1000, 1250); watcher resubmitted as 100439 (07:27, gnode049).
 - 11:43: 100439 at epoch 1797/2000, loss ~1.05 total (DLoss 0.07); checkpoints up to 1750. Expected end ~13:20, just inside the 6 h limit (13:27); if it times out, the watcher resubmits and the last epochs take minutes.
 - ada/sample.sbatch written and pushed (3246067). Laptop CPU check of sampling with model_1750 and the graph-aware sampler (2,000 rows) running, to catch bugs before the Ada sampling job.
+
+## 25 November 2026, 12:00 IST: first look at generated transactions (laptop, CPU)
+- model_1750, graph-aware sampler (strength 0.5), seed 0, 2,000 rows: sampling took 768 s on the CPU (798 s wall-clock). The pipeline works end to end.
+- Synthetic rows are far too short: 0.78 segments per row on average, against 4.33 in real val; 25.9% of rows are empty. Of the non-empty rows, most are single segments, so "valid" 71.5% is inflated by trivial rows. Gaps 2.7%, branches and cycles 0%.
+- Busy roads: Spearman 0.58 between real and synthetic segment use; top-10 overlap 0.4, top-50 0.52.
+- The graph-aware sampler flagged only 0.1% of segments per re-masking step: with so few active segments, there are few gaps or branches for it to act on.
+- Reading: the model under-generates the rare "present" value of the 300 sparse binary columns. This is a finding to report; possible fixes (conditioning on trip length, re-weighting the present class) are design changes, to discuss with the user (open item O7).

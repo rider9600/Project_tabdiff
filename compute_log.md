@@ -38,6 +38,7 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 24 Nov, about 11:55 | Transaction builder smoke test | scripts/build_transactions.py | not timed (seconds) | 4 taxis to 105 rows | |
 | 24 Nov, about 12:45 | Evaluation suite smoke test | scripts/evaluate_synthetic.py | 548.0 s | smoke table, 2 seeds | slow query search; fixed afterwards |
 | 24 Nov, from about 12:55 | TabDiff CPU smoke test with the graph-aware sampler | scripts/run_tabdiff.py | running | smoke table, 4 epochs | |
+| 25 Nov, 11:45 to 11:58 | Sampling check: model_1750, graph-aware, seed 0, 2,000 rows (CPU) | scripts/run_tabdiff.py | 798 s (768 s sampling) | results_ada/sample_test/ | 0.78 segments per row vs 4.33 real |
 
 ## Time summary (update after every run)
 
