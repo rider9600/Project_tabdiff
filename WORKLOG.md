@@ -104,3 +104,4 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
   the Chengdu checkpoint matters; 200 epochs from scratch on 23k trips is not enough.
 - This evaluation used 10 popular-path queries (default) instead of 26, so its Kendall columns are not
   comparable with the earlier table; the other metrics are independent of the queries.
+
