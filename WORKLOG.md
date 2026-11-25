@@ -73,3 +73,8 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 ## 25 November 2026, 15:00 IST: strength tuning (val, epoch 750) and final run
 - 100888 (strength 0.1, 6.9 min) and 100893 (0.25, 6.6 min). Results: 0.1 -> 2.56 segments/row, 88% of non-empty rows drivable, Spearman 0.43; 0.25 -> 2.20, 94%, 0.23; 0.5 -> 2.01, 97%, 0.14. No setting recovers frequent itemsets. Chosen: 0.1 (decision 23).
 - Final sampling job 100904 submitted 15:01: epoch 750, {default, graph-aware 0.1} x seeds 10, 11, 12, 8,761 rows each.
+
+## 25 November 2026, 16:40 IST: final evaluation (laptop, 297 s)
+- Test split, 8,761 rows per table, 3 seeds each for TabDiff. Results in docs/results_tdrive.md; raw in results_ada/final/evaluation.json.
+- Popular-path evaluation fixed: queries were never found by random probing (0 queries); now enumerated (26 pairs, one per distinct set of alternatives). With minF = 423 every candidate path has a segment below minF, so Reddy et al.'s omega is 0 everywhere; added omega without the minF rule (decision 25).
+- Headline: TabDiff default 61% drivable, Spearman 0.81, itemset Jaccard 0.10; graph-aware 0.1 87% drivable, 2.57 segments/row, Spearman 0.52; Markov baseline best on fidelity.

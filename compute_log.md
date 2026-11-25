@@ -43,6 +43,9 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 24 Nov, about 12:45 | Evaluation suite smoke test | scripts/evaluate_synthetic.py | 548.0 s | smoke table, 2 seeds | slow query search; fixed afterwards |
 | 24 Nov, from about 12:55 | TabDiff CPU smoke test with the graph-aware sampler | scripts/run_tabdiff.py | running | smoke table, 4 epochs | |
 | 25 Nov, 11:45 to 11:58 | Sampling check: model_1750, graph-aware, seed 0, 2,000 rows (CPU) | scripts/run_tabdiff.py | 798 s (768 s sampling) | results_ada/sample_test/ | 0.78 segments per row vs 4.33 real |
+| 25 Nov, 16:05 to 16:10 | Final evaluation, first try (0 popular-path queries) | scripts/evaluate_synthetic.py | 276 s | results_ada/final | query search bug |
+| 25 Nov, 16:12 to 16:17 | Final evaluation, 26 queries (all omega 0) | scripts/evaluate_synthetic.py | 297 s | | minF rule zeroes every path |
+| 25 Nov, 16:30 to 16:35 | Final evaluation, with omega without minF | scripts/evaluate_synthetic.py | 301 s | results_ada/final/evaluation.json | final numbers |
 
 ## Time summary (update after every run)
 
@@ -55,7 +58,7 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | Transaction table | Laptop | 62 s (build_transactions.py) | done: 42,705 rows |
 | TabDiff training | Ada | 17.85 h over 3 jobs (99878, 100223, 100439) + 0.41 h of failed/cancelled starts | done: 2,000 epochs |
 | Sampling (default and graph-aware) | Ada | 1.37 h (checkpoint sweep) | running: strength tuning |
-| Evaluation | Laptop | smoke test 548 s | |
+| Evaluation | Laptop | smoke 548 s; selection 22-25 s per run; final 276 + 297 + 301 s | done |
 
 Before this project's Ada work, the teammate ran the TabDiff baseline (Adult, 8,000 epochs) on Google
 Colab in 8 stages (experiments/stages/). Those runs are not logged here; their outputs are in
