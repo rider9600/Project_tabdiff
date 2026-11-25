@@ -81,3 +81,6 @@ results/adult_8000/.
 |---|---|---|
 | Ada GPU jobs | 5 (2 complete, 2 failed at start, 1 running) | 0.52 (finished jobs) |
 | Laptop runs | 13 | about 1.3 h of wall-clock |
+| 25 Nov 22:07 to 26 Nov 01:35 | DiffTraj C: from scratch, 200 epochs (55.7 s each) + 3 x 8,761 samples (438 s each) | Ada job 101403, gnode043 | 207 min | out/difftraj/tdrive_k300/scratch | COMPLETED |
+| 26 Nov, 01:41 to 02:13 | Decode DiffTraj C samples (map-matching, 7 workers) | scripts/difftraj_decode.py | 621 + 643 + 637 s | results_ada/difftraj/scratch/rows_s*.csv | 15% empty rows |
+| 26 Nov, 02:13 to 02:21 | Evaluation with DiffTraj B and C (10 queries) | scripts/evaluate_synthetic.py | 494 s | results_ada/difftraj/scratch/evaluation.json | |

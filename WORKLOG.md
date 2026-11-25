@@ -95,3 +95,12 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 - Test (mean of 3 seeds): drivable 83.8% (91% of non-empty), gaps 8.3%, 3.86 segments/row, busy-road Spearman 0.62, top-25 0.48, itemset Jaccard 0.335, maximal patterns contiguous 84%, tau (no minF) 0.50, exact copies 63%, DCR closer to train 8.5% (TabDiff 3.6%).
 - Caveat: map-matching returns a connected road path, so part of DiffTraj's drivability comes from the decoder; its gaps only arise where the path leaves and re-enters the 300 columns.
 - Evaluation run 438 s.
+
+## 26 Nov 2026, 02:25: DiffTraj C (from scratch) done and evaluated
+- Job 101403 COMPLETED in 207 min (200 epochs, final loss about 0.0015 vs 0.00084 for the fine-tuned B).
+- Decoded: 98.6% of points matched, 14.8% empty rows, 3.70 segments per row.
+- Test, mean of 3 seeds: valid 70.8%, gaps 13.7%, Spearman 0.58, top-25 0.31, itemset Jaccard 0.024,
+  maximal patterns contiguous 3.7%, exact copies 49%. B (fine-tuned) is clearly better on every metric:
+  the Chengdu checkpoint matters; 200 epochs from scratch on 23k trips is not enough.
+- This evaluation used 10 popular-path queries (default) instead of 26, so its Kendall columns are not
+  comparable with the earlier table; the other metrics are independent of the queries.
