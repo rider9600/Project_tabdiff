@@ -6,7 +6,7 @@
 
 Uses DiffTraj's own network (external/DiffTraj/utils/Traj_UNet.py: Guide_UNet), configuration
 (utils/config.py) and sampler step (utils/utils.py: p_xt) unchanged; only the data paths, checkpoint
-resume and output files are ours. Training follows the authors' main.py: AdamW lr 2e-4, batch 1024,
+resume and output files are ours. Training follows the authors' main.py: AdamW lr 2e-4, batch 1024 (512 on our 11 GB GPU),
 500-step linear beta schedule (1e-4 to 0.05), antithetic timesteps, MSE on the noise; the plain
 (non-EMA) weights are saved, as in main.py. Sampling follows process/Traj_Generation.ipynb: DDIM,
 100 steps, eta 0, guidance scale 3, attributes ("heads") drawn at random from the training split.
@@ -46,7 +46,7 @@ def train(a, cfg, data, out):
     head = torch.from_numpy(np.load(data / "head_train.npy")).float()
     assert traj.shape[2] == cfg.data.traj_length, "export length must match DiffTraj's traj_length"
     dl = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(traj, head),
-                                     batch_size=cfg.training.batch_size, shuffle=True, num_workers=0)
+                                     batch_size=a.batch_size or cfg.training.batch_size, shuffle=True, num_workers=0)
     n_steps = cfg.diffusion.num_diffusion_timesteps
     beta = torch.linspace(cfg.diffusion.beta_start, cfg.diffusion.beta_end, n_steps).cuda()
     alpha_bar = torch.cumprod(1.0 - beta, dim=0)
@@ -124,6 +124,8 @@ def main() -> None:
     ap.add_argument("--epochs", type=int, default=200)
     ap.add_argument("--check", type=int, default=10)
     ap.add_argument("--init", default="", help="train: start from these weights (the authors' model.pt)")
+    ap.add_argument("--batch-size", type=int, default=0,
+                    help="train: override DiffTraj's batch 1024 (it does not fit an 11 GB GPU)")
     ap.add_argument("--work", default="", help="train: folder for the resume checkpoint (node-local scratch)")
     ap.add_argument("--ckpt", default="", help="sample: checkpoint (default: the newest)")
     ap.add_argument("--seed", type=int, default=0)
