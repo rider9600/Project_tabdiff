@@ -176,20 +176,19 @@ def choose_queries(real_train: pd.DataFrame, edges: pd.DataFrame, n_queries: int
     """Source-destination pairs with at least 3 candidate paths, chosen once on real train data."""
     g = column_graph(edges)
     rng = np.random.default_rng(seed)
-    # Only pairs that are reachable and 3 to 30 segments apart, found with one BFS per sampled source.
-    sources = [n for n in g.nodes if g.out_degree(n) > 0]
-    queries, tries = [], 0
-    while len(queries) < n_queries and tries < max_tries:
-        tries += 1
-        s = sources[rng.integers(len(sources))]
-        hops = nx.single_source_shortest_path_length(g, s, cutoff=30)
-        far = [t for t, h in hops.items() if h >= 3]
-        if not far:
-            continue
-        t = far[rng.integers(len(far))]
-        if (s, t) not in queries and len(candidate_paths(g, s, t, delta)) >= 3:
-            queries.append((s, t))
-    return queries
+    # Enumerate every pair 3 to 30 segments apart with at least 3 candidate paths, then sample. Random
+    # probing missed them: in a 300-segment window the graph is fragmented and such pairs are rare.
+    pairs, seen = [], set()
+    for s in sorted(g.nodes):
+        for t, h in sorted(nx.single_source_shortest_path_length(g, s, cutoff=30).items()):
+            cands = candidate_paths(g, s, t, delta) if h >= 3 else []
+            key = frozenset(tuple(p) for p in cands)
+            if len(cands) >= 3 and key not in seen:   # one query per distinct set of alternatives
+                seen.add(key)
+                pairs.append((s, t))
+    if len(pairs) <= n_queries:
+        return pairs
+    return [pairs[i] for i in sorted(rng.choice(len(pairs), n_queries, replace=False))]
 
 
 def popular_path_agreement(real: pd.DataFrame, syn: pd.DataFrame, edges: pd.DataFrame, queries, min_count: int,
@@ -197,19 +196,26 @@ def popular_path_agreement(real: pd.DataFrame, syn: pd.DataFrame, edges: pd.Data
     g = column_graph(edges)
     br, bs = to_bool(real), to_bool(syn)
     syn_count = max(int(round(min_count * len(syn) / max(len(real), 1))), 2)
-    taus, precs = [], []
-    for s, t in queries:
-        cands = candidate_paths(g, s, t, delta)
-        sr = [popularity(p, br, min_count) for p in cands]
-        ss = [popularity(p, bs, syn_count) for p in cands]
-        if np.std(sr) > 0 and np.std(ss) > 0:
-            taus.append(kendalltau(sr, ss).statistic)
-        top_r = set(np.argsort(sr)[::-1][:top])
-        top_s = set(np.argsort(ss)[::-1][:top])
-        precs.append(len(top_r & top_s) / min(top, len(cands)))
-    return {"queries": len(queries), "kendall_tau_mean": round(float(np.mean(taus)), 4) if taus else float("nan"),
-            "queries_with_tau": len(taus), f"precision_at_{top}_mean": round(float(np.mean(precs)), 4)
-            if precs else float("nan")}
+    out = {"queries": len(queries)}
+    # "": Reddy et al.'s omega (0 if any edge is below minF); "_no_minf": the same score without that
+    # rule, so rankings stay comparable when every candidate path has an edge below minF.
+    for tag, mr, ms in (("", min_count, syn_count), ("_no_minf", 0, 0)):
+        taus, precs, zero = [], [], 0
+        for s, t in queries:
+            cands = candidate_paths(g, s, t, delta)
+            sr = [popularity(p, br, mr) for p in cands]
+            ss = [popularity(p, bs, ms) for p in cands]
+            zero += int(max(sr) == 0)
+            if np.std(sr) > 0 and np.std(ss) > 0:
+                taus.append(kendalltau(sr, ss).statistic)
+            top_r = set(np.argsort(sr)[::-1][:top])
+            top_s = set(np.argsort(ss)[::-1][:top])
+            precs.append(len(top_r & top_s) / min(top, len(cands)))
+        out[f"kendall_tau_mean{tag}"] = round(float(np.mean(taus)), 4) if taus else float("nan")
+        out[f"queries_with_tau{tag}"] = len(taus)
+        out[f"queries_all_zero_real{tag}"] = zero
+        out[f"precision_at_{top}_mean{tag}"] = round(float(np.mean(precs)), 4) if precs else float("nan")
+    return out
 
 
 # ---------------------------------------------------------------- 5. privacy
