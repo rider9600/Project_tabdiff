@@ -19,7 +19,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 99857 | train, batch 1024, 8,000 epochs | gnode043 / 2080 Ti | 24 Nov 18:58 | 24 Nov 19:21 | 0.39 | CANCELLED (by Claude) | 50+ epochs; loss 5.40 to 1.04 by epoch 50; about 25 s per epoch | fef0fd6 | 8,000 epochs would take ~55 h; restarted with 2,000 (decision 20) |
 | 99878 | train, batch 1024, 2,000 epochs, checkpoint every 500 (EXP=e2000) | gnode043 / 2080 Ti | 24 Nov 19:21 | 25 Nov 01:21 | 6.00 | TIMEOUT (expected) | about 770 epochs; checkpoint 500 saved (loss 0.43 at 550); ~28 s per epoch | fef0fd6 | watcher crashed at the end (challenge 13); resubmitted by hand |
 | 100223 | train, resume from model_500, checkpoint every 250 | gnode049 / 2080 Ti | 25 Nov 01:24 | 25 Nov 07:24 | 6.00 | TIMEOUT (expected) | epochs 500 to ~1260; checkpoints 750, 1000, 1250 | fef0fd6 | resubmitted by the watcher |
-| 100439 | train, resume from model_1250 | gnode049 / 2080 Ti | 25 Nov 07:27 | | | running | | 3246067 | expected to finish epoch 2000 around 13:20 |
+| 100439 | train, resume from model_1250 | gnode049 / 2080 Ti | 25 Nov 07:27 | 25 Nov 13:18 | 5.85 | COMPLETED | epochs 1250 to 2000; checkpoints 1500, 1750, 2000 | 3246067 | training done: 2,000 epochs over 4 jobs, 17.85 h of GPU time (99878 6.00 + 100223 6.00 + 100439 5.85) |
+| 100792 | sample (tdr_sample), checkpoints 500 to 2000 x {default, graph 0.5}, seed 0, 4,566 rows each | | 25 Nov 13:20 (submitted) | | | running | | 732aa44 | 14 tables, for choosing the checkpoint |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 
@@ -49,7 +50,7 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | Map-matching, main run | Laptop 46 min (stopped), then Ada | **Ada 5.74 h** (99378 5.08 h + 99794 0.66 h), 1,000 taxis | done |
 | Ada environment setup | Ada | 0.52 h over 2 jobs (+ 2 failed starts of 0 s) | done |
 | Transaction table | Laptop | 62 s (build_transactions.py) | done: 42,705 rows |
-| TabDiff training | Ada | job 99854 from 18:55 | running |
+| TabDiff training | Ada | 17.85 h over 3 jobs (99878, 100223, 100439) + 0.41 h of failed/cancelled starts | done: 2,000 epochs |
 | Sampling (default and graph-aware) | Ada | not started | |
 | Evaluation | Laptop | smoke test 548 s | |
 

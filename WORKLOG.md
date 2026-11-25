@@ -57,3 +57,8 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 - Busy roads: Spearman 0.58 between real and synthetic segment use; top-10 overlap 0.4, top-50 0.52.
 - The graph-aware sampler flagged only 0.1% of segments per re-masking step: with so few active segments, there are few gaps or branches for it to act on.
 - Reading: the model under-generates the rare "present" value of the 300 sparse binary columns. This is a finding to report; possible fixes (conditioning on trip length, re-weighting the present class) are design changes, to discuss with the user (open item O7).
+
+## 25 November 2026, 13:20 IST
+- Training COMPLETED (100439, 13:18): 2,000 epochs, checkpoints every 250 from 500 to 2000. Total 17.85 GPU hours over 3 jobs.
+- Watcher crashed again when printing tqdm characters to the Windows console (cp1252); fixed with UTF-8 stdout (9435484). Challenge 14.
+- Sampling job 100792 submitted: 7 checkpoints x {default, graph-aware 0.5}, seed 0, 4,566 rows each (validation size).

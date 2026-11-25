@@ -17,3 +17,7 @@ Every problem met, however small, and how it was resolved.
 | 11 | Training job 99856 ran out of GPU memory (11 GB) at the first batch | TabDiff's default train batch of 4,096 rows is too large with 300 columns on an RTX 2080 Ti | Runner option --train-batch-size; training uses 1,024 and expandable CUDA segments (job 99857 ran fine) |
 | 12 | Training speed: about 25 s per epoch, so 8,000 epochs would take about 55 h | 29 batches per epoch plus TabDiff's per-epoch EMA loss pass over the whole training set | Cancelled 99857 after 23 min and restarted with 2,000 epochs (decision 20), best of 4 checkpoints chosen on validation |
 | 13 | The watcher crashed when training job 99878 timed out, so it did not resubmit | ssh output decoded with the Windows code page; the log tail held progress-bar bytes (UnicodeDecodeError) | ada_watch.py decodes as UTF-8 with replacement (68db20a); resubmitted by hand as 100223 within 4 minutes. Also: checkpoints every 500 epochs lost ~270 epochs per 6 h job, so CHECK is now 250 |
+
+## 14. Watcher crashed printing job logs on the Windows console (25 Nov 2026)
+- **Problem:** after challenge 13's fix (UTF-8 decoding), printing the decoded log tail still failed: the Windows console encoding (cp1252) cannot encode tqdm's bar characters (U+258E). The watcher exited at 13:20, just after training finished.
+- **Fix:** the watcher reconfigures stdout to UTF-8 with replacement (commit 9435484). Nothing was lost; the job had already completed.
