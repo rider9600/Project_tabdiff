@@ -21,3 +21,7 @@ Every problem met, however small, and how it was resolved.
 ## 14. Watcher crashed printing job logs on the Windows console (25 Nov 2026)
 - **Problem:** after challenge 13's fix (UTF-8 decoding), printing the decoded log tail still failed: the Windows console encoding (cp1252) cannot encode tqdm's bar characters (U+258E). The watcher exited at 13:20, just after training finished.
 - **Fix:** the watcher reconfigures stdout to UTF-8 with replacement (commit 9435484). Nothing was lost; the job had already completed.
+
+## 15. TabDiff's stochastic sampler is off for our table (25 Nov 2026)
+- **Problem:** found while answering the user's question about the stochastic sampler. TabDiff sets `stochastic_sampler = False` when a table has no numerical columns (unified_ctime_diffusion.py, lines 70-72). Our table is all categorical, so TabDiff's re-masking chance is 0, and the "default sampler" never re-masks. Earlier records called the comparison "TabDiff's stochastic sampler vs graph-aware"; it was really "no re-masking vs graph-targeted re-masking".
+- **Fix:** wording corrected (project plan, results, sampler docstring). Added the missing control: random re-masking with the same number of re-masked segments per row and step as the graph-aware arm (job 101112).
