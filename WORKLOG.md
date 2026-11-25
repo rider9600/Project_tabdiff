@@ -82,3 +82,10 @@ Everything Claude does on its own is listed here, newest last, so it can be repo
 ## 25 November 2026, 17:45 IST: ablation arm B (job 101112, 35 min; evaluation 432 s)
 - Random re-masking (count matched to the graph rule's flags in the current state, random decided segments): 62.6% drivable, 3.85 segments/row, Spearman 0.81; re-masked share 0.49% per step (graph-aware 0.16%).
 - vs A (no re-masking) 61.0% and C (graph-aware) 87.0%. The validity gain comes from the graph targeting. Written into docs/results_tdrive.md.
+
+## 25 November 2026, 21:00 IST: DiffTraj comparison started (agreed with the user: options B and C)
+- DiffTraj code vendored (MIT, upstream 27d25a9); authors' Chengdu checkpoint downloaded on Ada (md5 cfd3c57e...).
+- Export: the same transactions as TabDiff (train 29,378 / val 4,566 / test 8,761) as 200-point trips with DiffTraj's 8 attributes (time fields 0). 16 s.
+- Decoder (map-matching back to the 300 columns), checked on 300 real val trips: Jaccard 0.94, exact rows 77%, 4.64 vs 4.40 segments per row. This is the ceiling for DiffTraj after decoding.
+- Batch 1024 and 512 ran out of memory on the 2080 Ti; kept the authors' batch 1024 with gradient accumulation (8 x 128). Ada home 98% full: checkpoints on node scratch, only final weights (65 MB) kept.
+- Job 101372 (B, fine-tune 50 epochs): 55 s per epoch, loss 0.023 -> 0.006 after 2 epochs. C (200 epochs, ~3.1 h) next.

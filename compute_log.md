@@ -25,6 +25,10 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 100893 | sample, epoch 750, graph strength 0.25, seed 0 | 2080 Ti | 25 Nov 14:53 | 25 Nov 15:00 | 0.11 | COMPLETED | 1 table, 376 s | 714b90c | strength tuning on val |
 | 100904 | sample (final), epoch 750, {default, graph 0.1} x seeds 10-12, 8,761 rows | | 25 Nov 15:01 | 25 Nov 15:59 | 0.97 | COMPLETED | 6 tables, 565 to 630 s each | 714b90c | final tables for the test evaluation |
 | 101112 | sample, ablation arm B: random re-masking 0.1, epoch 750, seeds 10-12, 8,761 rows | 2080 Ti | 25 Nov 16:57 | 25 Nov 17:32 | 0.59 | COMPLETED | 3 tables, 671 to 731 s each | d416627 | user-requested ablation |
+| 101366 | difftraj (tdr_difftraj), option B fine-tune, batch 1024 | gnode043 / 2080 Ti | 25 Nov 20:54 | 25 Nov 20:54 | 0.00 | FAILED | 0 | 6805bcd | CUDA out of memory at batch 1024; authors' weights loaded fine |
+| 101368 | difftraj, same (submitted by a failed edit chain) | gnode043 | 25 Nov 20:55 | 25 Nov 20:55 | 0.00 | FAILED | 0 | 6805bcd | out of memory again |
+| 101370 | difftraj, B, batch 512 | gnode043 | 25 Nov 20:57 | 25 Nov 20:57 | 0.00 | FAILED | 0 | 3f8d376 | out of memory at 512 |
+| 101372 | difftraj, B: fine-tune authors' Chengdu checkpoint 50 epochs (batch 1024 as 8 x 128 accumulated), then sample 3 x 8,761 | gnode043 / 2080 Ti | 25 Nov 20:58 | | | running | 55 s per epoch | 7cd0c94 | |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 
@@ -48,6 +52,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 25 Nov, 16:12 to 16:17 | Final evaluation, 26 queries (all omega 0) | scripts/evaluate_synthetic.py | 297 s | | minF rule zeroes every path |
 | 25 Nov, 16:30 to 16:35 | Final evaluation, with omega without minF | scripts/evaluate_synthetic.py | 301 s | results_ada/final/evaluation.json | final numbers |
 | 25 Nov, 17:35 to 17:42 | Evaluation with ablation arm B (9 TabDiff tables) | scripts/evaluate_synthetic.py | 432 s | results_ada/final/evaluation.json | |
+| 25 Nov, 20:40 | DiffTraj export (200-point trips + 8 attributes) | scripts/difftraj_export.py | 16.4 s | data_clean/difftraj/tdrive_k300 | |
+| 25 Nov, 20:55 | Decoder check on 300 real val trips | scripts/difftraj_decode.py --check val | 51.3 s | | Jaccard 0.94, exact rows 77% |
 
 ## Time summary (update after every run)
 
