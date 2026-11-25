@@ -39,7 +39,7 @@ def main() -> None:
     real_len = float(ev.to_bool(val[cols]).sum(axis=1).mean())
     rows = []
     for p in sorted(Path(a.samples).glob("*_e*_s*.csv")):
-        m = re.match(r"(\w+?)_e(\d+)_s(\d+)\.csv", p.name)
+        m = re.match(r"([^_]+)_e(\d+)_s(\d+)\.csv", p.name)
         syn = pd.read_csv(p)
         b = ev.to_bool(syn[cols])
         trips = ev.trip_validity(syn, edges)
