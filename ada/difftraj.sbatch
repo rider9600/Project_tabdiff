@@ -19,7 +19,7 @@
 
 set -euo pipefail
 : "${PROJECT:?set PROJECT}"; : "${NAME:?set NAME}"; : "${EXP:?set EXP}"; : "${EPOCHS:?set EPOCHS}"
-INIT=${INIT:-}; BATCH=${BATCH:-512}; SEEDS=${SEEDS:-"10 11 12"}; NSAMP=${NSAMP:-8761}
+INIT=${INIT:-}; BATCH=${BATCH:-1024}; SEEDS=${SEEDS:-"10 11 12"}; NSAMP=${NSAMP:-8761}
 source /home2/cs9442.01/$PROJECT/code/ada/common.sh
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 [ -f "$HOME/envs/$PROJECT/.ready" ] || { echo "~/envs/$PROJECT not ready: run the env job first"; exit 1; }

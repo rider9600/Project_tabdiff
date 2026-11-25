@@ -6,7 +6,7 @@
 
 Uses DiffTraj's own network (external/DiffTraj/utils/Traj_UNet.py: Guide_UNet), configuration
 (utils/config.py) and sampler step (utils/utils.py: p_xt) unchanged; only the data paths, checkpoint
-resume and output files are ours. Training follows the authors' main.py: AdamW lr 2e-4, batch 1024 (512 on our 11 GB GPU),
+resume and output files are ours. Training follows the authors' main.py: AdamW lr 2e-4, batch 1024 (as micro-batches of 128 with gradient accumulation, to fit 11 GB),
 500-step linear beta schedule (1e-4 to 0.05), antithetic timesteps, MSE on the noise; the plain
 (non-EMA) weights are saved, as in main.py. Sampling follows process/Traj_Generation.ipynb: DDIM,
 100 steps, eta 0, guidance scale 3, attributes ("heads") drawn at random from the training split.
@@ -74,11 +74,15 @@ def train(a, cfg, data, out):
             ab = alpha_bar.gather(-1, t).reshape(-1, 1, 1)
             eps = torch.randn_like(x0)
             xt = ab.sqrt() * x0 + (1 - ab).sqrt() * eps
-            loss = F.mse_loss(eps, unet(xt, t, h))
+            # The authors' batch (1024) does not fit 11 GB: same update, accumulated over micro-batches.
             optim.zero_grad()
-            loss.backward()
+            total = 0.0
+            for sl in torch.split(torch.arange(len(x0), device=x0.device), a.micro_batch):
+                part = F.mse_loss(eps[sl], unet(xt[sl], t[sl], h[sl])) * len(sl) / len(x0)
+                part.backward()
+                total += part.item()
             optim.step()
-            losses.append(loss.item())
+            losses.append(total)
         print(f"epoch {epoch} loss {np.mean(losses):.5f} {time.time() - t0:.1f}s", flush=True)
         if epoch % a.check == 0 or epoch == a.epochs:
             torch.save({"model": unet.state_dict(), "optim": optim.state_dict(), "epoch": epoch}, work / "last.pt")
@@ -124,8 +128,9 @@ def main() -> None:
     ap.add_argument("--epochs", type=int, default=200)
     ap.add_argument("--check", type=int, default=10)
     ap.add_argument("--init", default="", help="train: start from these weights (the authors' model.pt)")
-    ap.add_argument("--batch-size", type=int, default=0,
-                    help="train: override DiffTraj's batch 1024 (it does not fit an 11 GB GPU)")
+    ap.add_argument("--batch-size", type=int, default=0, help="train: override DiffTraj's batch 1024")
+    ap.add_argument("--micro-batch", type=int, default=128,
+                    help="train: rows per forward/backward pass; gradients are accumulated to the full batch")
     ap.add_argument("--work", default="", help="train: folder for the resume checkpoint (node-local scratch)")
     ap.add_argument("--ckpt", default="", help="sample: checkpoint (default: the newest)")
     ap.add_argument("--seed", type=int, default=0)
