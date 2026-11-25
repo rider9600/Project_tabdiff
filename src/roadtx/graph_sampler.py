@@ -10,7 +10,9 @@ the road-segment columns that make the partly generated trip undrivable:
   segments that could join a piece end to a piece start (so the model can switch them on).
 
 For a flagged column, move_chance becomes mc + (1 - mc) * strength. Unflagged columns keep TabDiff's
-value, so strength = 0 gives back the original sampler. Training is unchanged; a trained model is reused.
+value, so strength = 0 gives back the original sampler. Note: TabDiff turns its own stochastic sampler off
+when a table has no numerical columns (our case), so TabDiff's mc is 0 and only flagged columns are ever
+re-masked. mode="random" is the control: the same number of re-masked columns per row, at random places. Training is unchanged; a trained model is reused.
 
 install() patches UnifiedCtimeDiffusion in memory (no edit of baseline_tabdiff/).
 """
@@ -56,8 +58,18 @@ def violations(x: torch.Tensor, one_index: torch.Tensor, mask_index: torch.Tenso
     return branch | boundary | bridge
 
 
-def install(diffusion_cls, edges: pd.DataFrame, strength: float = 0.5) -> None:
-    """Patch diffusion_cls so that sample() uses the graph-aware re-masking."""
+def random_like(flag: torch.Tensor, decided: torch.Tensor) -> torch.Tensor:
+    """Control arm: in each row, flag as many columns as `flag` does, chosen uniformly at random among
+    the decided columns (re-masking an undecided column would do nothing)."""
+    k = flag.sum(dim=1, keepdim=True)
+    score = torch.rand(flag.shape, device=flag.device).masked_fill(~decided, -1.0)
+    rank = score.argsort(dim=1, descending=True).argsort(dim=1)
+    return (rank < k) & decided
+
+
+def install(diffusion_cls, edges: pd.DataFrame, strength: float = 0.5, mode: str = "graph") -> None:
+    """Patch diffusion_cls so that sample() uses the graph-aware re-masking (mode "graph"), or the
+    matched random control (mode "random": same number of re-masked columns per row, random places)."""
     original_q_xt = diffusion_cls.q_xt
     original_sample = diffusion_cls.sample
 
@@ -72,6 +84,8 @@ def install(diffusion_cls, edges: pd.DataFrame, strength: float = 0.5) -> None:
             n_classes = torch.as_tensor(self.mask_index, device=x.device)
             self._tdr_one = torch.where(n_classes == 2, 1, -1).to(x.device)
         flag = violations(x, self._tdr_one, self.mask_index.to(x.device), self._tdr_graph)
+        if mode == "random":
+            flag = random_like(flag, x != self.mask_index.to(x.device))
         mc = torch.broadcast_to(move_chance, x.shape).to(torch.float32)
         mc = mc + (1.0 - mc) * strength * flag.float()
         STATS["calls"] += 1
