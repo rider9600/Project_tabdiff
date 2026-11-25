@@ -28,7 +28,8 @@ in the JSON reports) or logs, never from memory. Failed and stopped runs are lis
 | 101366 | difftraj (tdr_difftraj), option B fine-tune, batch 1024 | gnode043 / 2080 Ti | 25 Nov 20:54 | 25 Nov 20:54 | 0.00 | FAILED | 0 | 6805bcd | CUDA out of memory at batch 1024; authors' weights loaded fine |
 | 101368 | difftraj, same (submitted by a failed edit chain) | gnode043 | 25 Nov 20:55 | 25 Nov 20:55 | 0.00 | FAILED | 0 | 6805bcd | out of memory again |
 | 101370 | difftraj, B, batch 512 | gnode043 | 25 Nov 20:57 | 25 Nov 20:57 | 0.00 | FAILED | 0 | 3f8d376 | out of memory at 512 |
-| 101372 | difftraj, B: fine-tune authors' Chengdu checkpoint 50 epochs (batch 1024 as 8 x 128 accumulated), then sample 3 x 8,761 | gnode043 / 2080 Ti | 25 Nov 20:58 | | | running | 55 s per epoch | 7cd0c94 | |
+| 101372 | difftraj, B: fine-tune authors' Chengdu checkpoint 50 epochs (batch 1024 as 8 x 128 accumulated), then sample 3 x 8,761 | gnode043 / 2080 Ti | 25 Nov 20:58 | 25 Nov 22:07 | 1.15 | COMPLETED | 50 epochs (55 s each, final loss 0.00084) + 3 x 8,761 samples (438 s each) | 7cd0c94 | |
+| 101403 | difftraj, C: from scratch 200 epochs (batch 1024 as 8 x 128), then sample 3 x 8,761 | gnode043 / 2080 Ti | 25 Nov 22:07 | | | running | | 7cd0c94 | submitted automatically after B |
 
 ## Laptop runs (8 cores, 16 GB RAM, no usable GPU for this work)
 
