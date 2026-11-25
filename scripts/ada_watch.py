@@ -19,6 +19,7 @@ import re
 import subprocess
 import sys
 import time
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # job logs contain tqdm bar characters
 
 PROJECT = os.environ.get("PROJECT") or sys.exit("set PROJECT (the folder under ~ on Ada)")
 SSH = ["ssh", "-i", "~/.ssh/id_ed25519_ada", "-o", "BatchMode=yes", "-o", "ConnectTimeout=30",
