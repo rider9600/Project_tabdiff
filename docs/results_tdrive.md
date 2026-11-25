@@ -19,6 +19,11 @@ frequencies (busy-road Spearman about 0.81) but loses the joint structure (91% o
 Graph-aware strength at epoch 750: 0.1 gives 2.56 segments and 88% drivable non-empty rows; 0.25 gives 2.20 and
 94%; 0.5 gives 2.01 and 97%. Chosen: epoch 750, default and graph-aware 0.1.
 
+**Note on the samplers:** TabDiff disables its own stochastic sampler for tables with no numerical columns
+(ours), so "default sampler" below means TabDiff with no re-masking. "Graph-aware" re-masks only the
+segments flagged by the road graph. A matched random re-masking arm (same count, random segments) is
+being run to separate the effect of re-masking from that of the graph.
+
 ## Test results
 
 | Method | Drivable rows | Rows with gaps | Segments / row | Busy roads: Spearman | Busy roads: top-25 overlap | Frequent itemsets: Jaccard | Maximal patterns contiguous | Popular paths: Kendall τ (no minF) | Exact copies of train rows |

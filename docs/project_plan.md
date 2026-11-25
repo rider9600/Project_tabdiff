@@ -63,6 +63,13 @@ TabDiff's stochastic sampler re-masks already-decided categorical columns at eac
 
 This combines TabDiff's error-correcting stochastic sampling with the road graph from Reddy et al. Only the sampler changes, so it reuses the trained model.
 
+**Finding during the experiments (25 November 2026):** TabDiff turns its stochastic sampler off when a table
+has no numerical columns, and our transaction table has none. TabDiff's default sampling of our table
+therefore never re-masks anything. The comparison is three arms at the same checkpoint and seeds:
+(A) no re-masking (TabDiff as it runs on this table), (B) random re-masking with the same number of
+re-masked segments per row and step as C, at random places, and (C) graph-targeted re-masking. A vs C
+measures adding re-masking; B vs C measures the value of the graph targeting.
+
 ## 6. Evaluation
 
 Synthetic and real data have the same number of rows. Patterns are mined with FP-Growth at a single threshold **minF**, set once on the real training data to the **third quartile of single-edge support**. It's lowered (e.g. to the median) if that yields fewer than ~100 multi-edge patterns, and the same absolute value is used for every dataset.
