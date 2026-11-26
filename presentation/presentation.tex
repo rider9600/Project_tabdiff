@@ -170,42 +170,43 @@
 % =========================================================================
 \section{(f) Experiments}
 
-\begin{frame}{(f) Experimental Reproduction Benchmarks}
-  \textbf{Evaluation Protocol on Benchmark Datasets:}
+\begin{frame}{(f) Experimental Reproduction Setup}
+  \textbf{Evaluation Protocol on Adult Benchmark Dataset:}
   \begin{itemize}
-    \item Datasets: \textbf{Adult} (income classification), \textbf{Beijing} (PM2.5 pollution), \textbf{Default} (credit card), \textbf{Magic} (gamma telescope), \textbf{Shoppers} (online purchase intention).
+    \item Dataset Reproduced: \textbf{Adult} (income classification; 32,561 training rows, 16,281 test rows, 6 numerical + 9 categorical features), trained for the full \textbf{8,000 epochs} on NVIDIA Tesla T4 GPU.
   \end{itemize}
   \vspace{0.2cm}
-  \textbf{Metrics Evaluated:}
+  \textbf{Metrics Evaluated (Matching Paper Tables 1--3, 7--10):}
   \begin{enumerate}
-    \item \textbf{Data Fidelity:} Wasserstein Distance (continuous columns) \& Jensen-Shannon Divergence (categorical distributions).
-    \item \textbf{Machine Learning Efficiency (MLE):} Train on Synthetic, Test on Real (TSTR) F1-score / AUROC / RMSE.
-    \item \textbf{Distance to Closest Record (DCR):} Privacy evaluation checking that synthetic samples do not memorize training rows.
+    \item \textbf{Statistical Fidelity:} Column Shape (KST/TVD), Column Pair Trend (Pearson/Contingency), $\alpha$-Precision, $\beta$-Recall, and C2ST (Logistic Detection).
+    \item \textbf{Machine Learning Efficiency (MLE):} Train on Synthetic, Test on Real (TSTR) using XGBoost Classifier (AUROC, Binary F1, Accuracy).
+    \item \textbf{Privacy (DCR):} Distance to Closest Record comparing synthetic-to-real vs. synthetic-to-test L1 distances.
   \end{enumerate}
-  \vspace{0.2cm}
-  \textbf{Reproduction Status:}
-  \begin{itemize}
-    \item Environment setup configured (`tabdiff.yaml`, PyTorch 2.x, CUDA / Kaggle T4 GPU).
-    \item Baseline reproduction confirms TabDiff outperforms TabDDPM and TabSyn across mixed modalities.
-  \end{itemize}
 \end{frame}
 
 \begin{frame}{(f) Full 8,000-Epoch Empirical Reproduction (Adult Dataset)}
   \begin{columns}
-    \begin{column}{0.48\textwidth}
-      \textbf{Reproduction Results (8,000 Epochs):}
-      \begin{itemize}
-        \item \textbf{Column Shape Score:} \textbf{99.24\%}
-        \item \textbf{Column Pair Trend:} \textbf{98.54\%}
-        \item \textbf{Overall Fidelity:} \textbf{98.89\%}
-        \item \textbf{Data Validity:} \textbf{100.0\%}
-        \item \textbf{Data Structure:} \textbf{100.0\%}
-      \end{itemize}
-      \vspace{0.2cm}
-      \small
-      Our full 8,000-epoch training on Tesla T4 GPU achieves $>98.8\%$ overall distributional fidelity, matching and exceeding published baseline benchmarks.
+    \begin{column}{0.54\textwidth}
+      \scriptsize
+      \begin{tabular}{lcc}
+        \toprule
+        \textbf{Metric (Adult)} & \textbf{TabDiff Paper} & \textbf{Our Repro (8k)} \\
+        \midrule
+        Shape Error (\%) $\downarrow$ & $0.63 \pm 0.05$ & \textbf{0.76\%} (99.24\%) \\
+        Trend Error (\%) $\downarrow$ & $1.49 \pm 0.16$ & \textbf{1.46\%} (98.54\%) \\
+        MLE (XGB AUROC) $\uparrow$   & $0.912 \pm 0.002$ & \textbf{0.9135} \\
+        C2ST (Detection) $\uparrow$  & $0.9950$ & \textbf{0.9788} \\
+        $\alpha$-Precision (\%) $\uparrow$ & $99.02 \pm 0.20$ & \textbf{98.80\%} \\
+        $\beta$-Recall (\%) $\uparrow$ & $51.64 \pm 0.20$ & \textbf{54.40\%} \\
+        Data Validity (\%) $\uparrow$ & 100.0\% & \textbf{100.0\%} \\
+        \bottomrule
+      \end{tabular}
+      \vspace{0.15cm}
+      \newline
+      \tiny
+      Note: DCR on 2:1 real/test split is $0.7390$ (paper uses 1:1 equal split for $50.10\%$).
     \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.44\textwidth}
       \begin{figure}
         \centering
         \includegraphics[width=\textwidth]{density_plots.png}
@@ -220,24 +221,24 @@
 % =========================================================================
 \section{(g) Extensions Done as Part of the Project}
 
-\begin{frame}{(g) Extensions Proposed and Implemented}
+\begin{frame}{(g) Proposed Extensions (Conceptual / Future Work)}
   \begin{enumerate}
-    \item \textbf{Extension 1: Fast High-Order Mixed Sampler (Efficiency Improvement)}
+    \item \textbf{Extension 1: Fast High-Order Mixed Sampler (Prototype)}
       \begin{itemize}
-        \item \emph{Motivation:} Baseline TabDiff requires 50--100 NFEs, leading to slow inference.
-        \item \emph{Implementation:} Adaptive 2nd-order Heun/DPM-Solver hybrid sampler for the continuous columns coupled with dynamic step-skipped categorical sampling.
+        \item \emph{Motivation:} Baseline TabDiff requires 50--100 NFEs, leading to higher inference latency.
+        \item \emph{Design:} Adaptive 2nd-order Heun predictor for continuous columns coupled with dynamic step-skipped categorical sampling (\texttt{extensions/fast\_sampler.py}; conceptual prototype, not yet integrated/benchmarked).
       \end{itemize}
     \vspace{0.2cm}
-    \item \textbf{Extension 2: Feature-Correlation Guided Scheduling (Quality Improvement)}
+    \item \textbf{Extension 2: Feature-Correlation Guided Scheduling (Future Work)}
       \begin{itemize}
         \item \emph{Motivation:} Independent learnable schedules ignore covariance between strongly coupled columns (e.g., Education \& Occupation).
-        \item \emph{Implementation:} Graph/Cross-attention schedule coupling where column noise rates adapt conditioned on mutual information.
+        \item \emph{Design:} Mutual-information conditioned schedule coupling (proposed future direction; not implemented).
       \end{itemize}
     \vspace{0.2cm}
-    \item \textbf{Extension 3: Class-Imbalanced Conditional Tabular Synthesis (Novel Application)}
+    \item \textbf{Extension 3: Class-Imbalanced Conditional Synthesis (Future Work)}
       \begin{itemize}
-        \item \emph{Motivation:} Real tabular datasets suffer severe class imbalance (e.g., fraud 1:100).
-        \item \emph{Implementation:} Target-guided mixed continuous-discrete diffusion with adaptive CFG temperature scaling for minority class oversampling.
+        \item \emph{Motivation:} Real tabular datasets often exhibit severe class imbalance.
+        \item \emph{Design:} Target-guided mixed diffusion with adaptive CFG scaling (proposed future direction; not implemented).
       \end{itemize}
   \end{enumerate}
 \end{frame}
@@ -247,8 +248,8 @@
 % =========================================================================
 \section{(h) New Results and Algorithms}
 
-\begin{frame}{(h) New Algorithmic Contributions}
-  \textbf{Algorithm: Accelerated Mixed-Type Predictor-Corrector Sampler}
+\begin{frame}{(h) Proposed Algorithmic Design (Future Work)}
+  \textbf{Proposed Algorithm: Accelerated Mixed-Type Predictor-Corrector Sampler}
   \begin{algorithm}[H]
     \footnotesize
     \KwIn{Trained model $\theta$, step count $S \ll T$, schedule $\gamma(t)$, initial noise $x_1$}
@@ -262,8 +263,8 @@
     }
     \Return $\text{Decode}(x_0)$;
   \end{algorithm}
-  \begin{block}{Theoretical Advantage}
-    Reduces total function evaluations by \textbf{60\%--75\%} while maintaining provable convergence bounds on Wasserstein-1 distance.
+  \begin{block}{Status}
+    Algorithmic design drafted in \texttt{extensions/fast\_sampler.py}; integration with \texttt{UnifiedCtimeDiffusion} and empirical benchmarking remain future work.
   \end{block}
 \end{frame}
 
@@ -272,42 +273,26 @@
 % =========================================================================
 \section{(i) New Experimental Results}
 
-\begin{frame}{(i) Experimental Validation of Proposed Improvements}
-  \textbf{Inference Speedup vs Quality Retention (Adult \& Default Datasets):}
-  \begin{table}[h]
-    \centering
-    \footnotesize
-    \begin{tabular}{lcccc}
-      \toprule
-      \textbf{Method} & \textbf{Sampling Steps} & \textbf{Runtime (s/1k rows)} & \textbf{Wasserstein $\downarrow$} & \textbf{TSTR F1 / AUC $\uparrow$} \\
-      \midrule
-      Baseline TabDiff & 100 & 14.8s & 0.024 & 0.842 \\
-      Baseline TabDiff & 50  & 7.6s  & 0.031 & 0.835 \\
-      \midrule
-      \textbf{Our Fast Sampler (Ours)} & \textbf{25} & \textbf{3.9s (3.8$\times$ faster)} & \textbf{0.026} & \textbf{0.841} \\
-      \textbf{Our Fast Sampler (Ours)} & \textbf{15} & \textbf{2.4s (6.1$\times$ faster)} & 0.033 & 0.832 \\
-      \textbf{Correlation-Coupled TabDiff} & 50 & 7.7s & \textbf{0.021} & \textbf{0.849} \\
-      \bottomrule
-    \end{tabular}
-  \end{table}
-  \vspace{0.2cm}
+\begin{frame}{(i) Summary of Verified Findings \& Future Experiments}
+  \textbf{Verified Reproduction Findings (Adult Dataset, 8,000 Epochs):}
   \begin{itemize}
-    \item \textbf{Speedup:} Achieved $>3.8\times$ inference acceleration with $<0.5\%$ loss in downstream ML classification performance.
-    \item \textbf{Quality:} Correlation-coupled schedule achieved lower Wasserstein distance on heavily interdependent categorical-numerical columns.
+    \item \textbf{Marginal \& Pairwise Fidelity:} Reproduced $0.76\%$ Shape error ($99.24\%$ score) and $1.46\%$ Trend error ($98.54\%$ score), closely matching the paper's $0.63\%$ and $1.49\%$.
+    \item \textbf{Downstream Utility (MLE):} XGBoost trained on synthetic data achieved \textbf{0.9135 AUROC} (EMA: \textbf{0.9138}, paper: $0.912$) on real test data.
+    \item \textbf{Sample-Level Quality:} $\alpha$-Precision of \textbf{98.80\%} (EMA: \textbf{99.09\%}), $\beta$-Recall of \textbf{54.40\%} (EMA: \textbf{54.81\%}), and C2ST of \textbf{0.9788} (EMA: \textbf{0.9850}).
+  \end{itemize}
+  \vspace{0.2cm}
+  \textbf{Pending / Future Experimental Work:}
+  \begin{itemize}
+    \item Integrating and timing \texttt{FastMixedSampler} against the 8,000-epoch baseline on GPU.
+    \item Reproducing the remaining 6 datasets (Default, Shoppers, Magic, Beijing, News, Diabetes).
   \end{itemize}
 \end{frame}
 
 % Conclusion slide
 \begin{frame}{Conclusion and Project Summary}
   \begin{itemize}
-    \item \textbf{Reproduction:} Successfully validated TabDiff's mixed continuous-time framework against baseline tabular generators.
-    \item \textbf{Extensions Delivered:}
-      \begin{enumerate}
-        \item Fast accelerated mixed-type solver reducing generation time by $\sim 4\times$.
-        \item Feature-correlation coupled noise scheduling boosting multi-modal fidelity.
-        \item Conditional generation pipeline applied to imbalanced tabular synthesis.
-      \end{enumerate}
-    \item \textbf{Artifacts:} Full reproduction codebase, extension suite, comprehensive report, and presentation slides available in repository.
+    \item \textbf{Reproduction:} Successfully trained TabDiff for 8,000 epochs on the Adult dataset and verified all paper metrics (Density Shape/Trend, MLE, C2ST, $\alpha$-Precision, $\beta$-Recall, and DCR).
+    \item \textbf{Future Extensions:} Proposed a 2nd-order mixed-type fast sampler, correlation-coupled noise scheduling, and class-imbalanced conditional generation as next steps.
   \end{itemize}
   \vspace{0.4cm}
   \centering

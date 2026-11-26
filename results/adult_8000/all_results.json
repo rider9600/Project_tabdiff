@@ -1,5 +1,37 @@
 {
-    "density/Shape": 0.9924490443577695, 
-    "density/Trend": 0.9854025462268454, 
-    "density/Overall": 0.9889257952923074
+  "density/Shape": 0.9924490443577695,
+  "density/Trend": 0.9854025462268454,
+  "density/Overall": 0.9889257952923074,
+  "shape_error_pct": 0.76,
+  "trend_error_pct": 1.46,
+  "mle_auroc": 0.9135,
+  "mle_binary_f1": 0.6601,
+  "mle_accuracy": 0.8564,
+  "c2st": 0.9788,
+  "alpha_precision": 0.988,
+  "beta_recall": 0.544,
+  "dcr": 0.739,
+  "ema": {
+    "density/Shape": 0.9919658487147202,
+    "density/Trend": 0.9840417866584138,
+    "density/Overall": 0.988003817686567,
+    "shape_error_pct": 0.8,
+    "trend_error_pct": 1.6,
+    "mle_auroc": 0.9138,
+    "mle_binary_f1": 0.6774,
+    "mle_accuracy": 0.8616,
+    "c2st": 0.985,
+    "alpha_precision": 0.9909,
+    "beta_recall": 0.5481,
+    "dcr": 0.7393
+  },
+  "paper_tabdiff_adult_reference": {
+    "shape_error_pct": 0.63,
+    "trend_error_pct": 1.49,
+    "mle_auroc": 0.912,
+    "c2st": 0.995,
+    "alpha_precision": 0.9902,
+    "beta_recall": 0.5164,
+    "dcr": 0.501
+  }
 }

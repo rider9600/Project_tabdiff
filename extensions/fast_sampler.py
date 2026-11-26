@@ -1,7 +1,9 @@
 """
-Accelerated Mixed-Type Predictor-Corrector Sampler for TabDiff
-Reduces NFEs (Neural Function Evaluations) from 100 to 15-25 steps using
-a 2nd-order continuous ODE predictor combined with dynamic discrete lookahead jumps.
+[CONCEPTUAL PROTOTYPE - NOT INTEGRATED OR BENCHMARKED]
+Accelerated Mixed-Type Predictor-Corrector Sampler for TabDiff.
+Designed as a proposed extension to reduce NFEs using a 2nd-order continuous ODE
+predictor combined with discrete jump updates. Note: calls `predict_denoised(...)`
+as an interface placeholder and is not yet wired to UnifiedCtimeDiffusion.
 """
 
 import torch

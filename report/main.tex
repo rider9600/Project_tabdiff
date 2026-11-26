@@ -17,7 +17,7 @@
 \maketitle
 
 \begin{abstract}
-Tabular data synthesis poses distinctive challenges due to the coexistence of continuous and categorical features, complex multimodal correlations, and significant disparity in column-wise distributions. In this project, we reproduce and critically evaluate \textbf{TabDiff} (ICLR 2025), a unified continuous-time diffusion framework for mixed-type tabular data that integrates feature-wise learnable noise schedules and stochastic sampling error correction. Beyond exact reproduction across benchmark datasets, we introduce algorithmic extensions focusing on: (1) \textit{Inference acceleration via high-order mixed-type predictor-corrector sampling}, achieving a $3.8\times$ speedup with negligible fidelity loss; (2) \textit{Correlation-guided schedule coupling} to capture cross-feature dependencies; and (3) \textit{Conditional synthesis for severe class-imbalanced tabular regimes}. This report presents our methodology, theoretical analysis, reproduction findings, and extensive experimental benchmarks.
+Tabular data synthesis poses distinctive challenges due to the coexistence of continuous and categorical features, complex multimodal correlations, and significant disparity in column-wise distributions. In this project, we reproduce and critically evaluate \textbf{TabDiff} (ICLR 2025), a unified continuous-time diffusion framework for mixed-type tabular data that integrates feature-wise learnable noise schedules and stochastic sampling error correction. We perform a full 8,000-epoch reproduction on the \textbf{Adult} benchmark dataset and evaluate all paper metrics: marginal Shape ($0.76\%$ error / $99.24\%$ score), pairwise Trend ($1.46\%$ error / $98.54\%$ score), Machine Learning Efficiency (XGBoost AUROC $0.9135$, EMA $0.9138$), $\alpha$-Precision ($98.80\%$), $\beta$-Recall ($54.40\%$), C2ST ($0.9788$), and DCR privacy. We also outline conceptual future extensions for accelerated high-order sampling, correlation-guided schedule coupling, and class-imbalanced conditional synthesis.
 \end{abstract}
 
 \section{Introduction and Paper Summary}
@@ -66,23 +66,32 @@ We reproduced the benchmark experiments across standard tabular datasets, focusi
 \end{itemize}
 
 \subsection{Empirical Reproduction Results}
-Training TabDiff with learnable continuous and categorical schedules for the full 8,000 epochs on an NVIDIA Tesla T4 GPU yielded the convergence and fidelity metrics in Table \ref{tab:repro_metrics}.
+Training TabDiff with learnable continuous and categorical schedules for the full 8,000 epochs on an NVIDIA Tesla T4 GPU yielded the metrics in Table \ref{tab:repro_metrics}, compared directly against the published Adult results in the TabDiff paper (Tables 1--3 and 7--10).
 
 \begin{table}[ht]
 \centering
-\caption{Quantitative reproduction metrics for TabDiff on Adult dataset at 8,000 epochs.}
+\caption{Full 8,000-epoch reproduction metrics on the Adult dataset compared with the TabDiff paper.}
 \label{tab:repro_metrics}
-\begin{tabular}{lcccc}
+\begin{tabular}{lccc}
 \toprule
-\textbf{Checkpoint} & \textbf{Shape Score} & \textbf{Pair Trend Score} & \textbf{Overall Score} & \textbf{Data Validity} \\
+\textbf{Metric} & \textbf{TabDiff Paper (Adult)} & \textbf{Our Repro (8k)} & \textbf{Our Repro (8k EMA)} \\
 \midrule
-Epoch 2,000 & 98.47\% & 97.24\% & 97.85\% & 100.0\% \\
-Epoch 4,000 & 98.71\% & 97.89\% & 98.30\% & 100.0\% \\
-Epoch 6,000 & 99.05\% & 98.22\% & 98.64\% & 100.0\% \\
-\textbf{Epoch 8,000 (Final)} & \textbf{99.24\%} & \textbf{98.54\%} & \textbf{98.89\%} & \textbf{100.0\%} \\
-\textbf{Epoch 8,000 (EMA)}   & \textbf{99.20\%} & \textbf{98.40\%} & \textbf{98.80\%} & \textbf{100.0\%} \\
+Shape Error (\%) $\downarrow$       & $0.63 \pm 0.05$   & \textbf{0.76\%} (99.24\%) & 0.80\% (99.20\%) \\
+Trend Error (\%) $\downarrow$       & $1.49 \pm 0.16$   & \textbf{1.46\%} (98.54\%) & 1.60\% (98.40\%) \\
+Overall Density Score $\uparrow$    & --                & \textbf{98.89\%}          & 98.80\% \\
+Data Validity (\%) $\uparrow$       & 100.0\%           & \textbf{100.0\%}          & \textbf{100.0\%} \\
+MLE (XGBoost AUROC) $\uparrow$      & $0.912 \pm 0.002$ & 0.9135                    & \textbf{0.9138} \\
+MLE (XGBoost Binary F1) $\uparrow$  & --                & 0.6601                    & \textbf{0.6774} \\
+MLE (XGBoost Accuracy) $\uparrow$   & --                & 0.8564                    & \textbf{0.8616} \\
+C2ST (Logistic Detection) $\uparrow$& $0.9950$          & 0.9788                    & \textbf{0.9850} \\
+$\alpha$-Precision (\%) $\uparrow$  & $99.02 \pm 0.20$  & 98.80\%                   & \textbf{99.09\%} \\
+$\beta$-Recall (\%) $\uparrow$      & $51.64 \pm 0.20$  & 54.40\%                   & \textbf{54.81\%} \\
+DCR (2:1 real/test split)           & $50.10\%^*$       & 73.90\%                   & 73.93\% \\
 \bottomrule
 \end{tabular}
+\vspace{0.1cm}
+\newline
+\footnotesize{$^*$Note: The paper computes DCR on a 1:1 equal split of the dataset, whereas our evaluation compares against the full 32,561-row training set vs.\ 16,281-row test set (2:1 ratio).}
 \end{table}
 
 \begin{figure}[ht]
@@ -92,41 +101,20 @@ Epoch 6,000 & 99.05\% & 98.22\% & 98.64\% & 100.0\% \\
 \label{fig:density}
 \end{figure}
 
-\section{Proposed Extensions and Improvements}
-To address open questions regarding TabDiff's inference speed, cross-column coupling, and performance under extreme imbalance, we developed three extensions:
+\section{Proposed Extensions and Future Work}
+To address open questions regarding TabDiff's inference speed, cross-column coupling, and performance under extreme imbalance, we outline three extension directions as future work (not yet implemented or benchmarked):
 
-\subsection{Extension 1: Accelerated Mixed-Type Predictor-Corrector Sampler}
-Baseline TabDiff requires 50 to 100 neural function evaluations (NFEs). We design an adaptive higher-order solver that pairs a 2nd-order Heun solver for numerical features with dynamic probability-thresholded categorical jump updates. This reduces sampling steps from 100 to 25 while preserving distribution fidelity.
+\subsection{Extension 1: Accelerated Mixed-Type Predictor-Corrector Sampler (Prototype)}
+Baseline TabDiff requires 50 to 100 neural function evaluations (NFEs). A conceptual prototype in \texttt{extensions/fast\_sampler.py} sketches a 2nd-order Heun solver for numerical features paired with categorical jump updates. Integrating this solver into \texttt{UnifiedCtimeDiffusion} and benchmarking its wall-clock speedup remain future work.
 
-\subsection{Extension 2: Feature Correlation-Coupled Scheduling}
-Rather than assuming independent schedules per feature $\gamma_i(t)$, we model feature interdependence by projecting pairwise mutual information into schedule adjustments, improving joint distribution capture.
+\subsection{Extension 2: Feature Correlation-Coupled Scheduling (Future Work)}
+Rather than assuming independent schedules per feature $\gamma_i(t)$, future work could model feature interdependence by projecting pairwise mutual information into schedule adjustments to improve joint distribution capture.
 
-\subsection{Extension 3: Conditional Synthesis for Severe Class Imbalance}
-We extend TabDiff with class-conditional embeddings and adaptive classifier-free guidance (CFG) scaling to oversample minority classes in tabular fraud and disease prediction tasks.
-
-\section{New Results and Analysis}
-Table \ref{tab:comparison} summarizes the inference time and quality comparison between baseline TabDiff and our accelerated methods.
-
-\begin{table}[ht]
-\centering
-\caption{Sampling runtime, statistical distance, and downstream ML performance on the Adult dataset.}
-\label{tab:comparison}
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Method} & \textbf{Steps} & \textbf{Runtime (s/1k rows)} & \textbf{Wasserstein Distance $\downarrow$} & \textbf{TSTR F1 Score $\uparrow$} \\
-\midrule
-Baseline TabDiff & 100 & 14.8 & 0.024 & 0.842 \\
-Baseline TabDiff & 50 & 7.6 & 0.031 & 0.835 \\
-\midrule
-\textbf{Ours (Fast Sampler)} & \textbf{25} & \textbf{3.9 (3.8$\times$ faster)} & \textbf{0.026} & \textbf{0.841} \\
-\textbf{Ours (Fast Sampler)} & \textbf{15} & \textbf{2.4 (6.1$\times$ faster)} & 0.033 & 0.832 \\
-\textbf{Ours (Coupled Schedule)} & 50 & 7.7 & \textbf{0.021} & \textbf{0.849} \\
-\bottomrule
-\end{tabular}
-\end{table}
+\subsection{Extension 3: Conditional Synthesis for Severe Class Imbalance (Future Work)}
+Extending TabDiff with class-conditional embeddings and adaptive classifier-free guidance (CFG) scaling to oversample minority classes in skewed tabular datasets is left for future implementation.
 
 \section{Conclusion}
-Our findings confirm that TabDiff provides an effective mixed-type continuous diffusion framework. Our proposed higher-order solver dramatically lowers sampling overhead by nearly $4\times$, making real-time tabular synthesis practical while maintaining rigorous synthetic data fidelity and privacy.
+Our findings confirm that TabDiff provides an effective mixed-type continuous diffusion framework. Our 8,000-epoch reproduction on the Adult dataset closely matches—and on Trend ($1.46\%$ vs.\ $1.49\%$), MLE AUROC ($0.9138$ vs.\ $0.912$), and $\beta$-Recall ($54.81\%$ vs.\ $51.64\%$) matches or slightly exceeds—the published paper metrics, while achieving $100\%$ data validity.
 
 \bibliographystyle{plain}
 \begin{thebibliography}{99}

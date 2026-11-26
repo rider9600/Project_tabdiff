@@ -10,11 +10,10 @@
 This repository hosts our final course project for **DFMGAI**. We focus on **TabDiff** ([ICLR 2025 paper](https://arxiv.org/abs/2410.20626)), a continuous-time mixed-type diffusion framework designed to model continuous and categorical tabular features within a unified architecture.
 
 Our project delivers three core contributions:
-1. **Paper Reproduction:** Systematic reproduction of baseline TabDiff results across benchmark tabular datasets (Adult, Beijing, Default, Magic, Shoppers) evaluated via fidelity (Wasserstein distance, JS-divergence), downstream ML efficiency (TSTR), and privacy protection (DCR).
-2. **Algorithmic Improvements & Extensions:**
-   - ⚡ **Efficiency Acceleration:** Accelerated mixed-type predictor-corrector sampler reducing NFEs from 100 to 25 ($3.8\times$ wall-clock speedup with negligible fidelity drop).
-   - 🎯 **Feature-Correlation Coupling:** Modeling cross-column covariance to enhance multi-modal alignment.
-   - 🛡️ **Novel Application:** Target-guided conditional generation for severe class imbalance.
+1. **Paper Reproduction:** Systematic reproduction of baseline TabDiff results on the **Adult** benchmark dataset (8,000 epochs on Tesla T4 GPU), evaluated via fidelity (Shape, Trend, $\alpha$-Precision, $\beta$-Recall, C2ST), downstream ML efficiency (MLE / TSTR), and privacy protection (DCR).
+2. **Proposed Extensions (Conceptual / Future Work):**
+   - ⚡ **Fast Mixed-Type Sampling:** Conceptual 2nd-order predictor-corrector prototype in `extensions/fast_sampler.py` (not yet integrated or benchmarked).
+   - 🎯 **Feature-Correlation Coupling & Imbalanced Synthesis:** Proposed future work directions (not yet implemented).
 3. **Academic Deliverables:**
    - 📊 **LaTeX Presentation:** A 30-minute evaluation presentation in LaTeX Beamer (`presentation/presentation.tex`) adhering to the mandatory sections **(a)** through **(i)**.
    - 📝 **Project Report:** A comprehensive project report in LaTeX (`report/main.tex`).
@@ -41,14 +40,12 @@ Project_tabdiff/
 │   ├── tabdiff.yaml               # Conda environment specifications
 │   └── README_ORIGINAL.md         # Original author README
 │
-├── extensions/                    # OUR CONTRIBUTIONS & IMPROVEMENTS
-│   ├── fast_sampler.py            # Accelerated 2nd-order predictor-corrector sampler
-│   ├── coupled_schedule.py        # Feature correlation-coupled noise scheduler
-│   └── conditional_imbalance.py   # Class-imbalanced conditional generation module
+├── extensions/                    # PROPOSED EXTENSIONS (CONCEPTUAL PROTOTYPES)
+│   └── fast_sampler.py            # Prototype 2nd-order sampler (not yet integrated/benchmarked)
 │
-├── experiments/                   # REPRODUCTION & BENCHMARK SCRIPTS
-│   ├── run_benchmark.py           # Inference speed and step ablation benchmark
-│   └── reproduce_results.py       # Paper baseline reproduction runner
+├── experiments/                   # REPRODUCTION & EVALUATION SCRIPTS
+│   ├── eval_adult_full.py         # Full Adult evaluation suite (Shape, Trend, MLE, C2ST, alpha/beta, DCR)
+│   └── TabDiff_Colab_Reproduction.ipynb # Colab / Kaggle reproduction notebook
 │
 ├── results/                       # EXPERIMENTAL RESULTS & LOGS
 │   ├── reproduction_logs/         # Raw logs from paper reproduction
@@ -81,27 +78,37 @@ Tabular datasets power mission-critical applications (credit scoring, medical di
 
 ---
 
-## ⚡ Our Extensions & Proposed Improvements
+## ⚡ Proposed Extensions & Future Work
 
-| Improvement | Focus | Key Idea | Achieved Result |
+> **Note:** The extensions below are proposed design directions and are **not implemented/benchmarked** in the current codebase.
+
+| Extension | Focus | Proposed Idea | Status |
 | :--- | :--- | :--- | :--- |
-| **Fast Mixed-Type Sampler** | Efficiency | 2nd-order Heun solver on numericals + dynamic discrete lookahead | **$3.8\times$ inference speedup** (25 steps vs. 100 steps) |
-| **Coupled Noise Scheduling** | Quality | Mutual-information informed cross-column noise coupling | Lower Wasserstein distance on tightly correlated columns |
-| **Imbalanced Class Synthesis** | Application | CFG guidance temperature scaling for rare minority classes | Superior minority F1-score on skewed fraud/medical splits |
+| **Fast Mixed-Type Sampler** | Efficiency | 2nd-order Heun solver on numericals + dynamic discrete lookahead (`extensions/fast_sampler.py`) | Conceptual prototype (not integrated) |
+| **Coupled Noise Scheduling** | Quality | Mutual-information informed cross-column noise coupling | Future work (not implemented) |
+| **Imbalanced Class Synthesis** | Application | CFG guidance temperature scaling for rare minority classes | Future work (not implemented) |
 
 ---
 
 ## 📊 Experimental Results Summary
 
-### Inference Runtime vs. Statistical Fidelity (Adult Dataset)
+### Adult Dataset Reproduction (8,000 Epochs) vs. TabDiff Paper
 
-| Method | Sampling Steps | Runtime (s / 1k rows) | Speedup | Wasserstein-1 $\downarrow$ | TSTR F1 $\uparrow$ |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Baseline TabDiff** | 100 | 14.8s | 1.00$\times$ | 0.024 | 0.842 |
-| **Baseline TabDiff** | 50 | 7.6s | 1.95$\times$ | 0.031 | 0.835 |
-| **Our Fast Sampler** | **25** | **3.9s** | **3.80$\times$** | **0.026** | **0.841** |
-| **Our Fast Sampler** | **15** | **2.4s** | **6.16$\times$** | 0.033 | 0.832 |
-| **Our Coupled Schedule**| 50 | 7.7s | 1.92$\times$ | **0.021** | **0.849** |
+| Metric | TabDiff Paper (Adult) | Our Repro (8k) | Our Repro (8k EMA) |
+| :--- | :---: | :---: | :---: |
+| **Shape Error (%) $\downarrow$** | $0.63 \pm 0.05$ | **0.76%** (99.24%) | 0.80% (99.20%) |
+| **Trend Error (%) $\downarrow$** | $1.49 \pm 0.16$ | **1.46%** (98.54%) | 1.60% (98.40%) |
+| **Overall Density Score $\uparrow$** | -- | **98.89%** | 98.80% |
+| **Data Validity (%) $\uparrow$** | 100.0% | **100.0%** | **100.0%** |
+| **MLE (XGBoost AUROC) $\uparrow$** | $0.912 \pm 0.002$ | 0.9135 | **0.9138** |
+| **MLE (XGBoost Binary F1) $\uparrow$** | -- | 0.6601 | **0.6774** |
+| **MLE (XGBoost Accuracy) $\uparrow$** | -- | 0.8564 | **0.8616** |
+| **C2ST (Logistic Detection) $\uparrow$** | 0.9950 | 0.9788 | **0.9850** |
+| **$\alpha$-Precision (%) $\uparrow$** | $99.02 \pm 0.20$ | 98.80% | **99.09%** |
+| **$\beta$-Recall (%) $\uparrow$** | $51.64 \pm 0.20$ | 54.40% | **54.81%** |
+| **DCR (2:1 real/test split)** | $50.10\%$ (1:1 split) | 73.90% | 73.93% |
+
+Full raw output is saved in [`results/adult_8000/all_results.json`](results/adult_8000/all_results.json).
 
 ---
 
@@ -133,10 +140,10 @@ python baseline_tabdiff/process_dataset.py adult
 python baseline_tabdiff/main.py --dataname adult --method tabdiff
 ```
 
-### 4. Run Accelerated Benchmark
+### 4. Run Full Adult Evaluation
 ```bash
-# Evaluate runtime and step reduction
-python experiments/run_benchmark.py --dataset adult --num_samples 1000
+# Evaluate Shape, Trend, MLE, C2ST, alpha-Precision, beta-Recall, and DCR
+python experiments/eval_adult_full.py
 ```
 
 ---
