@@ -37,12 +37,13 @@ for E in $EPOCHS; do
     for SM in $SAMPLERS; do
       LB=$SM; [ "$SM" != default ] && [ "$STRENGTH" != 0.5 ] && LB=$SM$STRENGTH   # e.g. graph0.25, random0.1
       OUT="$PROJ/out/sample/$NAME/$EXP/${LB}_e${E}_s${SEED}.csv"
-      [ -f "$OUT" ] && { echo "=== exists $OUT"; continue; }
+      { [ -f "$OUT" ] || [ -f "$OUT.gz" ]; } && { echo "=== exists $OUT"; continue; }
       G=(); [ "$SM" != default ] && G=(--graph-edges "$EDGES" --graph-strength "$STRENGTH" --remask-mode "$SM")
       T0=$(date +%s)
       python -u scripts/run_tabdiff.py "${G[@]}" --skip-tabdiff-eval --seed "$SEED" --sample-batch-size 2000 \
           --samples-out "$OUT" -- --dataname "$NAME" --mode test --ckpt_path "$CK" --no_wandb --exp_name "$EXP" --num_samples_to_generate "$NSAMP"
-      echo "=== done $OUT in $(( $(date +%s) - T0 )) s"
+      gzip "$OUT"   # home folder nearly full: keep tables compressed (the evaluator reads .csv.gz)
+      echo "=== done $OUT.gz in $(( $(date +%s) - T0 )) s"
     done
   done
 done
