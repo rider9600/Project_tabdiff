@@ -38,7 +38,7 @@ def main() -> None:
     min_count = max(int(round(min_count_train * len(val) / len(train))), 2)
     real_len = float(ev.to_bool(val[cols]).sum(axis=1).mean())
     rows = []
-    for p in sorted(Path(a.samples).glob("*_e*_s*.csv")):
+    for p in sorted(Path(a.samples).glob("*_e*_s*.csv*")):
         m = re.match(r"([^_]+)_e(\d+)_s(\d+)\.csv", p.name)
         syn = pd.read_csv(p)
         b = ev.to_bool(syn[cols])

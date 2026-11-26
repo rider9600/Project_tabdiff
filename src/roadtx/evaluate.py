@@ -17,12 +17,16 @@ Levels:
 from __future__ import annotations
 
 import itertools
+import os
 from collections import Counter
 
 import networkx as nx
 import numpy as np
 import pandas as pd
 from mlxtend.frequent_patterns import fpgrowth
+# Longest itemset mined (6 for T-Drive); can be set with ROADTX_MAX_LEN for tables with longer rows,
+# where the number of frequent subsets would otherwise explode.
+MAX_LEN = int(os.environ.get("ROADTX_MAX_LEN", "6"))
 from scipy.stats import kendalltau, spearmanr
 
 from .transactions import chain, classify
@@ -85,7 +89,7 @@ def min_support_count(real_train: pd.DataFrame, quantile: float = 0.75) -> int:
     return max(int(np.quantile(counts[counts > 0], quantile)), 2)
 
 
-def frequent_itemsets(df: pd.DataFrame, min_count: int, max_len: int = 6) -> dict[frozenset, float]:
+def frequent_itemsets(df: pd.DataFrame, min_count: int, max_len: int = MAX_LEN) -> dict[frozenset, float]:
     b = to_bool(df)
     if len(b) == 0:
         return {}
@@ -110,7 +114,7 @@ def contiguity_rate(sets: list[frozenset], edges: pd.DataFrame) -> float:
 
 
 def pattern_fidelity(real: pd.DataFrame, syn: pd.DataFrame, edges: pd.DataFrame, min_count: int,
-                     max_len: int = 6) -> dict:
+                     max_len: int = MAX_LEN) -> dict:
     """Compare frequent itemsets at the same absolute threshold. Real and synthetic should have the
     same number of rows; the count is rescaled if they do not."""
     syn_count = max(int(round(min_count * len(syn) / max(len(real), 1))), 2)
