@@ -1,148 +1,325 @@
-\documentclass[11pt,a4paper]{article}
-\usepackage[margin=1in]{geometry}
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage{booktabs}
+\documentclass[10pt,twocolumn,a4paper]{article}
+\usepackage[margin=1.8cm,columnsep=0.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
 \usepackage{graphicx}
-\usepackage{hyperref}
-\usepackage{cite}
-\usepackage{algorithm2e}
-\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\tabcolsep}{4pt}
+\newcommand{\M}{\texttt{[M]}}
 
-\title{\textbf{TabDiff Reproduction and Algorithmic Extensions:\\Mixed-Type Diffusion for Tabular Data Generation}\\[0.3em]
-\large Course Project Final Report --- DFMGAI}
-\author{\textbf{Project Team}\\\textit{Department of Computer Science \& Engineering}}
-\date{\today}
+\title{\textbf{Can a Tabular Diffusion Model Generate Drivable Trips?}\\[2pt]
+\large TabDiff on Road-Traversal Transactions, with a Graph-Aware Sampler}
+\author{Gradient Gladiators: Abhay Sharma and Naveen Kumar\\
+\small IIIT Hyderabad \quad DFMGAI Course Project}
+\date{}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Tabular data synthesis poses distinctive challenges due to the coexistence of continuous and categorical features, complex multimodal correlations, and significant disparity in column-wise distributions. In this project, we reproduce and critically evaluate \textbf{TabDiff} (ICLR 2025), a unified continuous-time diffusion framework for mixed-type tabular data that integrates feature-wise learnable noise schedules and stochastic sampling error correction. Beyond exact reproduction across benchmark datasets, we introduce algorithmic extensions focusing on: (1) \textit{Inference acceleration via high-order mixed-type predictor-corrector sampling}, achieving a $3.8\times$ speedup with negligible fidelity loss; (2) \textit{Correlation-guided schedule coupling} to capture cross-feature dependencies; and (3) \textit{Conditional synthesis for severe class-imbalanced tabular regimes}. This report presents our methodology, theoretical analysis, reproduction findings, and extensive experimental benchmarks.
+TabDiff (ICLR 2025) is a continuous-time diffusion model for mixed-type tables. We first reproduce it on
+the Adult benchmark, matching the published Trend error (1.46\% against 1.49\%). We then ask whether it can
+generate road trips. Following Rathan, Reddy and Mondal (DAPD 2022), we turn taxi trajectories from T-Drive
+(Beijing) into market-basket transactions whose items are the road segments travelled, giving a
+300-column all-categorical table of 42,705 trips. TabDiff keeps which roads are busy (Spearman 0.81) but
+only 61\% of its trips are drivable paths. We propose a graph-aware re-masking sampler that sends
+segments violating road connectivity back to the mask during sampling. It raises drivable trips to 87\%,
+and a matched random control shows the gain comes from the road graph, not from re-masking as such. The
+cost is shorter trips and weaker busy-road agreement. We compare against Markov, independent and
+DiffTraj baselines and discuss what this says about tabular diffusion for structured data.
 \end{abstract}
 
-\section{Introduction and Paper Summary}
-Tabular datasets serve as the cornerstone of real-world decision systems in finance, healthcare, and enterprise management. Traditional tabular generative models rely on Generative Adversarial Networks (e.g., CTGAN) or Variational Autoencoders (e.g., TVAE). Recently, diffusion models have demonstrated remarkable success in continuous domains, motivating extensions to tabular synthesis (e.g., TabDDPM, CoDi, TabSyn).
+%======================================================================
+\section{Problem Statement and Motivation}
+\label{sec:a}
+Trajectory data from vehicles drives traffic planning, routing and map services, but it is sensitive: a
+trip reveals where a person lives and works. Synthetic trips that keep the statistics of the real ones,
+without copying them, would let such data be shared.
 
-\subsection{Key Limitations in Prior Works}
-Existing tabular diffusion models suffer from two primary paradigms:
-\begin{enumerate}
-    \item \textbf{Latent Continuous Embedding:} Methods such as TabSyn encode categorical features into continuous latent vectors using autoencoders before applying Gaussian diffusion. This induces irreversible reconstruction information loss and discrete cluster collapse.
-    \item \textbf{Disjoint Continuous and Discrete Diffusion:} Methods like TabDDPM apply independent Gaussian diffusion to numerical features and D3PM to categorical features. This leads to unsynchronized noise dynamics and catastrophic discrete decoding error accumulation.
-\end{enumerate}
+Rathan, Reddy and Mondal~\cite{reddy2022} showed that road-network traversals can be mined with
+frequent-pattern methods once each trip is written as a \emph{transaction}: a set of road segments. Popular
+paths then follow from frequent itemsets. A table of transactions is exactly the kind of data a tabular
+generative model learns. TabDiff~\cite{tabdiff} is the current state of the art for tabular synthesis.
 
-\subsection{The TabDiff Innovation}
-TabDiff introduces three foundational contributions:
-\begin{itemize}
-    \item \textbf{Unified Continuous-Time Formulation:} Formulates both Gaussian diffusion for numerical features and continuous-time categorical jump processes directly in the original feature space.
-    \item \textbf{Feature-Wise Learnable Schedules:} Parameterizes column-specific noise schedules $\gamma_i(t) = \text{Softplus}(w_i t + b_i)$ to accommodate the severe disparity in column entropy and scale.
-    \item \textbf{Mixed-Type Stochastic Sampler:} Combines numerical ODE/SDE solvers with categorical stochastic jump sampling to actively correct discrete decoding errors during sampling.
+\textbf{Question.} Can TabDiff generate road-traversal transactions that (i) are drivable paths on the road
+graph, and (ii) preserve the busy roads, frequent patterns and popular paths of the real data? And
+(iii) does a sampler that knows the road graph improve on TabDiff's default sampler?
+
+%======================================================================
+\section{Gaps Addressed}
+\label{sec:b}
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{Tabular models ignore structure between columns.} TabDiff, like other tabular generators,
+  treats columns as exchangeable features. Road segments are not: a valid trip is a connected path, a
+  hard constraint that no column-wise score (Shape, Trend) measures.
+\item \textbf{No evaluation of tabular diffusion on transaction data.} TabDiff was evaluated on seven UCI
+  tables with at most a few dozen columns, mostly dense. Road transactions have 300 sparse binary columns
+  (about 4 segments per trip are ``on'').
+\item \textbf{Sampling that can undo mistakes.} In masked diffusion a decoded value is final. TabDiff's
+  stochastic sampler can re-noise, but it is switched off for all-categorical tables, and it is blind to
+  domain constraints. We add a re-masking rule driven by the road graph.
 \end{itemize}
 
-\section{Problem Formulation and Theory}
-Let a tabular record be represented as $x = [x_{\text{num}}, x_{\text{cat}}]$, with $N_{\text{num}}$ continuous variables and $N_{\text{cat}}$ categorical variables. Each categorical variable $x_{\text{cat}}^i$ is represented as a one-hot vector in $\{0, 1\}^{K_i+1}$, including an absorbing $[MASK]$ token.
+%======================================================================
+\section{Problem Formulation}
+\label{sec:c}
+\textbf{Transactions.} Let $G=(V,E)$ be a directed road graph and $E_k\subset E$ the $k$ most used
+segments in a study window. A trip is map-matched to a sequence of segments; its transaction is the
+binary vector $x\in\{0,1\}^{k}$ with $x_j=1$ if segment $j$ is travelled. A transaction is
+\emph{drivable} if its on-segments form one simple directed path in $G$ (no gaps, no branches).
 
-\subsection{Forward Process}
-The forward marginal distribution factorizes across modalities:
-\begin{align}
-    q(x_{\text{num}, t} | x_{\text{num}, 0}) &= \mathcal{N}\left(\alpha_t x_{\text{num}, 0},\, \sigma_t^2 I\right) \\
-    q(x_{\text{cat}, t}^i | x_{\text{cat}, 0}^i) &= \text{Cat}\left((1 - \beta_t^i) x_{\text{cat}, 0}^i + \beta_t^i m^i\right)
-\end{align}
-where $m^i$ denotes the one-hot indicator for the mask state.
+\textbf{Generation.} Given a training table $\mathcal{D}=\{x^{(n)}\}$, learn $p_\theta(x)$ and sample a
+synthetic table $\tilde{\mathcal{D}}$ such that drivability is high and the following match the real test
+split: segment-use counts (busy roads), frequent itemsets (patterns), and the ranking of alternative
+paths between the same origin and destination (popular paths, Reddy et al.'s score $\omega$).
 
-\subsection{Variational Objective}
-The joint training objective optimizes the mixed-type ELBO parameterized by a transformer network $\theta$:
+\textbf{TabDiff's forward process.} Each categorical column $j$ with $C_j$ classes is extended with an
+absorbing mask class \M. In continuous time $t\in[0,1]$, with a learnable per-column schedule
+$\alpha_j(t)$ decreasing from 1 to 0,
 \begin{equation}
-    \mathcal{L}(\theta) = \mathbb{E}_{t, x_0, \epsilon} \left[ \lambda_{\text{num}}(t) \|\hat{x}_{\text{num}, \theta}(x_t, t) - x_{\text{num}, 0}\|_2^2 + \lambda_{\text{cat}}(t) \sum_{i=1}^{N_{\text{cat}}} \text{CE}\left(x_{\text{cat}, 0}^i, \hat{p}_\theta(x_{\text{cat}, 0}^i | x_t, t)\right) \right]
+q(x_{t,j}\mid x_{0,j}) = \alpha_j(t)\,\delta_{x_{0,j}} + \big(1-\alpha_j(t)\big)\,\delta_{\M},
 \end{equation}
+where $\delta_c$ puts all mass on class $c$. Numerical columns receive Gaussian noise with schedule $\sigma_j(t)$; our table has none.
 
-\section{Experimental Reproduction}
-We reproduced the benchmark experiments across standard tabular datasets, focusing on the \textbf{Adult} benchmark (32,561 rows, 6 continuous and 9 categorical columns).
+%======================================================================
+\section{Algorithm}
+\label{sec:d}
+\textbf{TabDiff.} A transformer $\mu_\theta(x_t,t)$ predicts the clean value of every masked column.
+Sampling starts from the all-mask row at $t=1$ and runs $T=50$ steps to $t=0$. At each step from $t$ to
+$s<t$ a masked column is unmasked with probability $\frac{\alpha(s)-\alpha(t)}{1-\alpha(t)}$, drawing its
+class from $\mu_\theta$; unmasked columns are copied.
 
-\subsection{Evaluation Metrics}
-\begin{itemize}
-    \item \textbf{Statistical Fidelity:} 1-Wasserstein distance for continuous features; Jensen-Shannon divergence for categorical feature marginals, captured via SDMetrics Column Shape and Trend fidelity scores.
-    \item \textbf{Machine Learning Efficiency (MLE):} Train on Synthetic, Test on Real (TSTR) evaluated using downstream XGBoost, Random Forest, and MLP classifiers (AUC / F1 / RMSE).
-    \item \textbf{Privacy Protection:} Distance to Closest Record (DCR) evaluated on 5th percentile distance to training vs. test sets to verify absence of sample memorization.
-\end{itemize}
+\textbf{Graph-aware re-masking (ours).} Before each denoising step we inspect the decided on-segments of
+every row and flag those that break drivability: segments in a branch (two on-segments leave or enter
+the same node), boundary segments of a row that splits into several pieces, and off-segments that would
+bridge two pieces. Flagged columns are re-masked with extra probability $\lambda$ (the strength), so the
+model can decide them again with more context. Training is unchanged; a trained checkpoint is reused.
 
-\subsection{Empirical Reproduction Results}
-Training TabDiff with learnable continuous and categorical schedules for the full 8,000 epochs on an NVIDIA Tesla T4 GPU yielded the convergence and fidelity metrics in Table \ref{tab:repro_metrics}.
+\begin{algorithm}[t]
+\caption{Graph-aware re-masking sampler}\label{alg:gs}
+\small
+\begin{algorithmic}[1]
+\Require trained $\mu_\theta$, road incidence $U,V$, strength $\lambda$
+\State $x \gets$ all \M
+\For{$i=T,\dots,1$}
+  \State $F \gets \textsc{Flag}(x;U,V)$ \Comment{branch, boundary, bridge}
+  \State $m \gets m_{\text{TabDiff}} + (1-m_{\text{TabDiff}})\,\lambda\,F$
+  \State re-mask each decided column with probability $m$
+  \State unmask with $\mu_\theta(x,t_i)$ (TabDiff step)
+\EndFor
+\State \Return $x$
+\end{algorithmic}
+\end{algorithm}
 
-\begin{table}[ht]
+\textbf{Control.} To separate the effect of the graph from that of re-masking, a \emph{random} arm
+re-masks, in every row and step, as many decided columns as the graph rule flags there, chosen
+uniformly at random.
+
+%======================================================================
+\section{Theory}
+\label{sec:e}
+\textbf{Training objective.} For masked diffusion the negative ELBO reduces to a weighted cross-entropy on
+masked positions~\cite{tabdiff}:
+\begin{equation}
+\mathcal{L}_{\text{cat}} = \mathbb{E}_{t,x_0,x_t}\Big[\sum_{j:\,x_{t,j}=\M}
+\tfrac{\alpha_j'(t)}{1-\alpha_j(t)}\log \langle \mu_{\theta,j}(x_t,t),\,x_{0,j}\rangle\Big],
+\end{equation}
+where $\alpha_j'(t)<0$. TabDiff learns the schedule parameters of each column jointly with $\theta$.
+
+\textbf{Absorbing state.} \M\ can be entered but not left in the forward process, so in the reverse process
+a decoded value is never revisited. An early wrong guess (a segment that cannot be joined to the rest of
+the trip) stays. Re-masking breaks this: with re-masking probability $m$, the reverse chain becomes a
+predictor--corrector scheme whose stationary target is still $p_\theta$, but which revisits values.
+
+\textbf{Why the graph-aware rule shortens trips.} A trip has about 4 on-segments out of 300 columns, so
+for any column the model's marginal is strongly ``off''. A flagged on-segment that is re-masked is decided
+again from a distribution dominated by ``off''. Re-masking therefore removes more segments than it
+repairs: validity rises because invalid segments disappear, not because missing ones are filled. This
+predicts shorter rows and a loss of busy-road agreement, which is what we observe (Section~\ref{sec:i}).
+
+%======================================================================
+\section{Experiments and Reproduction}
+\label{sec:f}
+We reproduced TabDiff on Adult (32,561 rows; 6 numerical, 9 categorical columns) with the authors' code
+and settings, training 8,000 epochs. Table~\ref{tab:repro} compares the final checkpoint with the paper.
+
+\begin{table}[h]
 \centering
-\caption{Quantitative reproduction metrics for TabDiff on Adult dataset at 8,000 epochs.}
-\label{tab:repro_metrics}
-\begin{tabular}{lcccc}
+\caption{Reproduction on Adult: error rates (\%, lower is better).}
+\label{tab:repro}
+\begin{tabular}{lcc}
 \toprule
-\textbf{Checkpoint} & \textbf{Shape Score} & \textbf{Pair Trend Score} & \textbf{Overall Score} & \textbf{Data Validity} \\
+ & Shape error & Trend error \\
 \midrule
-Epoch 2,000 & 98.47\% & 97.24\% & 97.85\% & 100.0\% \\
-Epoch 4,000 & 98.71\% & 97.89\% & 98.30\% & 100.0\% \\
-Epoch 6,000 & 99.05\% & 98.22\% & 98.64\% & 100.0\% \\
-\textbf{Epoch 8,000 (Final)} & \textbf{99.24\%} & \textbf{98.54\%} & \textbf{98.89\%} & \textbf{100.0\%} \\
-\textbf{Epoch 8,000 (EMA)}   & \textbf{99.20\%} & \textbf{98.40\%} & \textbf{98.80\%} & \textbf{100.0\%} \\
+TabDiff (paper) & $0.63\pm0.05$ & $1.49\pm0.16$ \\
+TabDiff (ours) & 0.76 & 1.46 \\
+\midrule
+TabSyn (paper) & 0.81 & 1.93 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure}[ht]
+Our Trend error matches the paper; Shape is 0.13 points worse, still better than the strongest baseline
+reported in the paper (TabSyn). The reproduction confirms the code runs as published before we move to a
+new kind of data.
+
+%======================================================================
+\begin{table*}[t]
 \centering
-\includegraphics[width=0.85\textwidth]{density_plots.png}
-\caption{Comparison of real vs. generated feature density marginal distributions across all 15 attributes of the Adult dataset at 8,000 epochs, demonstrating high distribution alignment.}
-\label{fig:density}
+\caption{T-Drive test split (8,761 trips). Means over 3 seeds with 95\% $t$-intervals where the method is stochastic. Higher is better except for gaps and copies.}
+\label{tab:main}
+\begin{tabular}{lcccccccc}
+\toprule
+Method & Drivable & Gaps & Seg./row & Spearman & Top-25 & Itemset Jaccard & Path $\tau$ & Copies \\
+\midrule
+Real test (reference) & 1.000 & 0.000 & 4.26 & 0.87 & 0.80 & 0.60 & 0.92 & 0.99 \\
+Independent & $0.058\pm.004$ & 0.92 & 4.28 & $0.91\pm.03$ & 0.83 & 0.00 & 0.50 & 0.00 \\
+Markov & $1.000$ & 0.00 & 4.31 & $0.93\pm.03$ & 0.85 & $0.51\pm.29$ & 0.74 & 0.93 \\
+\midrule
+TabDiff, default & $0.610\pm.010$ & 0.37 & 3.86 & $0.81\pm.03$ & 0.48 & $0.10\pm.05$ & 0.85 & 0.47 \\
+TabDiff, random 0.1 (control) & $0.626\pm.011$ & 0.35 & 3.85 & $0.81\pm.02$ & 0.48 & $0.11\pm.05$ & 0.85 & 0.49 \\
+TabDiff, graph-aware 0.1 & $0.870\pm.010$ & 0.12 & 2.57 & $0.52\pm.06$ & 0.23 & $0.03\pm.01$ & 0.50 & 0.62 \\
+\midrule
+DiffTraj, fine-tuned & $0.838\pm.001$ & 0.08 & 3.86 & $0.62\pm.06$ & 0.48 & $0.34\pm.11$ & 0.50 & 0.63 \\
+DiffTraj, from scratch & $0.708\pm.018$ & 0.14 & 3.70 & $0.58\pm.03$ & 0.31 & $0.02\pm.04$ & 0.69 & 0.49 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Extensions Done in the Project}
+\label{sec:g}
+\textbf{Data pipeline.} T-Drive~\cite{tdrive}: 10,357 Beijing taxis, 2--8 February 2008, about 15 million
+points sampled every $\sim$3 minutes. Road graph from OpenStreetMap. Steps:
+(1) clean points (duplicates, speed spikes) and cut trips at stops;
+(2) map-match a random sample of 1,000 taxis with an HMM matcher (leuvenmapmatching), 98.6\% of points
+matched; (3) pick a 4\,km window in central Beijing and keep its $k=300$ most used directed segments;
+(4) write each trip as a 300-column binary transaction. Result: 42,705 trips with 4.3 segments on
+average, split \emph{by taxi} into train / validation / test (29,378 / 4,566 / 8,761), so no taxi appears in
+two splits.
+
+\textbf{Training.} TabDiff with the authors' architecture, batch 1,024 (11\,GB GPU), 2,000 epochs on one RTX
+2080 Ti (17.9 GPU hours). The checkpoint (epoch 750) and the sampler strength ($\lambda=0.1$) were chosen on
+validation only.
+
+\textbf{Baselines.}
+\emph{Independent}: each segment drawn from its training frequency.
+\emph{Markov}: a first-order chain over segments on the road graph, fitted on training trips (drivable by
+construction).
+\emph{DiffTraj}~\cite{difftraj}, a diffusion model for GPS trajectories: fine-tuned from the authors'
+Chengdu checkpoint (50 epochs) and trained from scratch (200 epochs), on the same trips; its output points
+are map-matched back to segments.
+
+\textbf{Metrics.} \emph{Validity}: share of drivable rows, share with gaps, segments per row.
+\emph{Busy roads}: Spearman correlation of segment-use counts, top-25 overlap. \emph{Patterns}: Jaccard of
+frequent multi-segment itemsets (FP-growth, support threshold minF = third quartile of single-segment
+support), contiguity of maximal patterns. \emph{Popular paths}: Kendall $\tau$ between real and synthetic
+rankings of alternative paths for 26 origin--destination queries. \emph{Privacy}: share of rows that are
+exact copies of a training row. TabDiff and DiffTraj use 3 sampling seeds; we report means with 95\%
+$t$-intervals.
+
+%======================================================================
+\section{New Results and Algorithms}
+\label{sec:h}
+\textbf{Graph-aware sampler.} Algorithm~\ref{alg:gs} is our algorithmic contribution. It needs only the
+node--segment incidence matrices $U,V\in\{0,1\}^{k\times|V|}$: the counts of decided on-segments leaving and
+entering each node are $xU$ and $xV$, so all three flags are computed with two matrix products per step,
+on the GPU, for the whole batch.
+
+\textbf{Ablation.} Table~\ref{tab:abl} isolates the effect of the graph. Random re-masking touches about
+three times as many segments per step as the graph rule, yet leaves TabDiff almost unchanged
+(+1.6 points). The graph-aware rule adds 26 points of drivable rows. So the gain comes from
+\emph{where} the model re-masks, not from re-masking as such.
+
+\begin{table}[h]
+\centering
+\caption{Ablation at epoch 750, strength 0.1, seeds 10--12 (test, mean $\pm$ s.d.).}
+\label{tab:abl}
+\small
+\begin{tabular}{lccc}
+\toprule
+Arm & Re-masked & Drivable (\%) & Seg./row \\
+\midrule
+A. None & 0 & $61.0\pm0.3$ & 3.86 \\
+B. Random & 0.49\% & $62.6\pm0.3$ & 3.85 \\
+C. Graph & 0.16\% & $87.0\pm0.3$ & 2.57 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%======================================================================
+\section{New Experimental Results}
+\label{sec:i}
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/tradeoff.pdf}
+\caption{Validity against busy-road agreement on the test split (error bars: 95\% intervals over seeds).
+The graph-aware sampler moves TabDiff right (more drivable) and down (less faithful).}
+\label{fig:tradeoff}
 \end{figure}
 
-\section{Proposed Extensions and Improvements}
-To address open questions regarding TabDiff's inference speed, cross-column coupling, and performance under extreme imbalance, we developed three extensions:
+Table~\ref{tab:main} and Figure~\ref{fig:tradeoff} give the main results.
 
-\subsection{Extension 1: Accelerated Mixed-Type Predictor-Corrector Sampler}
-Baseline TabDiff requires 50 to 100 neural function evaluations (NFEs). We design an adaptive higher-order solver that pairs a 2nd-order Heun solver for numerical features with dynamic probability-thresholded categorical jump updates. This reduces sampling steps from 100 to 25 while preserving distribution fidelity.
+\textbf{TabDiff keeps marginals, not structure.} With the default sampler, segment frequencies are close
+to real (Spearman 0.81) and popular-path rankings are good ($\tau=0.85$), but only 61\% of rows are drivable
+and 37\% have gaps. Frequent multi-segment patterns are mostly lost (Jaccard 0.10 against 0.60 for real
+data): the model learns each column well but not which columns go together.
 
-\subsection{Extension 2: Feature Correlation-Coupled Scheduling}
-Rather than assuming independent schedules per feature $\gamma_i(t)$, we model feature interdependence by projecting pairwise mutual information into schedule adjustments, improving joint distribution capture.
+\textbf{The graph-aware sampler trades fidelity for validity.} It raises drivable rows to 87\% and makes
+every maximal pattern contiguous, but rows shrink from 3.9 to 2.6 segments and busy-road agreement drops
+to 0.52, as predicted in Section~\ref{sec:e}.
 
-\subsection{Extension 3: Conditional Synthesis for Severe Class Imbalance}
-We extend TabDiff with class-conditional embeddings and adaptive classifier-free guidance (CFG) scaling to oversample minority classes in tabular fraud and disease prediction tasks.
+\textbf{Baselines.} The Markov chain, valid by construction, beats every generative model on fidelity but
+copies 93\% of training rows. DiffTraj fine-tuned is more drivable than default TabDiff (84\%) and keeps more
+patterns (0.34), but loses busy-road agreement (0.62). Trained from scratch it is clearly worse:
+pre-training matters for it. No generative model reaches both high validity and high fidelity.
 
-\section{New Results and Analysis}
-Table \ref{tab:comparison} summarizes the inference time and quality comparison between baseline TabDiff and our accelerated methods.
-
-\begin{table}[ht]
+\begin{figure}[t]
 \centering
-\caption{Sampling runtime, statistical distance, and downstream ML performance on the Adult dataset.}
-\label{tab:comparison}
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Method} & \textbf{Steps} & \textbf{Runtime (s/1k rows)} & \textbf{Wasserstein Distance $\downarrow$} & \textbf{TSTR F1 Score $\uparrow$} \\
-\midrule
-Baseline TabDiff & 100 & 14.8 & 0.024 & 0.842 \\
-Baseline TabDiff & 50 & 7.6 & 0.031 & 0.835 \\
-\midrule
-\textbf{Ours (Fast Sampler)} & \textbf{25} & \textbf{3.9 (3.8$\times$ faster)} & \textbf{0.026} & \textbf{0.841} \\
-\textbf{Ours (Fast Sampler)} & \textbf{15} & \textbf{2.4 (6.1$\times$ faster)} & 0.033 & 0.832 \\
-\textbf{Ours (Coupled Schedule)} & 50 & 7.7 & \textbf{0.021} & \textbf{0.849} \\
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[width=\columnwidth]{figures/itemsets.pdf}
+\caption{Frequent multi-segment itemsets recovered (Jaccard with the real training set's itemsets).}
+\label{fig:items}
+\end{figure}
 
-\section{Conclusion}
-Our findings confirm that TabDiff provides an effective mixed-type continuous diffusion framework. Our proposed higher-order solver dramatically lowers sampling overhead by nearly $4\times$, making real-time tabular synthesis practical while maintaining rigorous synthetic data fidelity and privacy.
+\textbf{Privacy.} Exact copies are high even for real test trips (99\%): in a 4\,km window many trips use the
+same few segments. Against that reference TabDiff copies less (47\%) than any other method that keeps
+structure.
 
-\bibliographystyle{plain}
-\begin{thebibliography}{99}
-\bibitem{shi2024tabdiff}
-J.~Shi, M.~Xu, H.~Hua, H.~Zhang, S.~Ermon, and J.~Leskovec.
-\newblock Tabdiff: A mixed-type diffusion model for tabular data generation.
-\newblock In \emph{ICLR}, 2025.
-\bibitem{kotelnikov2023tabddpm}
-A.~Kotelnikov, D.~Baranchuk, I.~Rubachev, and A.~Babenko.
-\newblock Tabddpm: Modelling tabular data with diffusion models.
-\newblock In \emph{ICML}, 2023.
-\bibitem{zhang2024tabsyn}
-H.~Zhang, J.~Zhang, B.~Sheng, et~al.
-\newblock Mixed-type tabular data synthesis with score-based diffusion in latent space.
-\newblock In \emph{ICLR}, 2024.
+%======================================================================
+\section{Conclusion and Limitations}
+TabDiff reproduces on Adult and transfers to road transactions in a limited way: it learns which roads are
+used, but treats a trip as a bag of columns and breaks connectivity in four rows out of ten. A graph-aware
+re-masking sampler, which costs two matrix products per step and no retraining, raises validity by 26
+points, and a matched control shows the road graph is what helps. Its weakness is structural: with sparse
+rows, re-deciding a segment usually turns it off. Constraining the \emph{choice} of segments during
+decoding, rather than re-masking after the fact, is the natural next step.
+
+\textbf{Limitations.} One city, one 4\,km window and one training run; popular-path queries cluster around
+few destinations, and with minF = 423 Reddy et al.'s $\omega$ is 0 for every candidate path, so we also
+report $\omega$ without the minF rule. T-Drive is sparsely sampled, so map-matching fills in segments between
+GPS points.
+
+\begin{thebibliography}{9}\small
+\bibitem{tabdiff} J.~Shi, M.~Xu, H.~Hua, H.~Zhang, S.~Ermon, J.~Leskovec. TabDiff: a mixed-type diffusion model
+for tabular data generation. \emph{ICLR}, 2025.
+\bibitem{reddy2022} P.~R.~Rathan, P.~K.~Reddy, A.~Mondal. A framework for discovering popular paths using
+transactional modeling and pattern mining. \emph{Distributed and Parallel Databases}, 40:109--133, 2022.
+\bibitem{tdrive} J.~Yuan, Y.~Zheng, C.~Zhang, W.~Xie, X.~Xie, G.~Sun, Y.~Huang. T-Drive: driving directions
+based on taxi trajectories. \emph{ACM SIGSPATIAL GIS}, 2010.
+\bibitem{difftraj} Y.~Zhu, Y.~Ye, S.~Zhang, X.~Zhao, J.~Yu. DiffTraj: generating GPS trajectory with diffusion
+probabilistic model. \emph{NeurIPS}, 2023.
 \end{thebibliography}
 
 \end{document}
-
